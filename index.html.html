@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>GrowthOS — AI Executive Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg:#ffffff;--bg2:#f8f8f9;--bg3:#f0f0f2;
+--text:#0a0a0b;--text2:#6b6b7a;--text3:#9999aa;
+--border:#e5e5eb;--border2:#d0d0db;
+--accent:#6366f1;--accent-bg:#eef2ff;--accent-dark:#4f46e5;
+--green:#10b981;--green-bg:#ecfdf5;
+--amber:#f59e0b;--amber-bg:#fffbeb;
+--red:#ef4444;--red-bg:#fef2f2;
+--blue:#3b82f6;--blue-bg:#eff6ff;
+--sidebar:220px;--topbar:52px;
+--radius:8px;--radius-lg:12px;--radius-xl:16px;
+--shadow:0 1px 3px rgba(0,0,0,.06);
+--shadow-md:0 4px 16px rgba(0,0,0,.08);
+}
+body{font-family:"Inter",sans-serif;background:var(--bg2);color:var(--text);font-size:14px;line-height:1.5;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+input,textarea,select,button{font-family:inherit}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+#auth{flex:1;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f0f0ff 0%,#fff 50%,#f0fff8 100%);padding:20px}
+.auth-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-xl);padding:40px;width:100%;max-width:400px;box-shadow:var(--shadow-md)}
+.auth-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:24px}
+.auth-mark{width:36px;height:36px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px}
+.auth-name{font-size:20px;font-weight:700;letter-spacing:-.4px}
+.auth-title{font-size:22px;font-weight:700;text-align:center;margin-bottom:6px;letter-spacing:-.4px}
+.auth-sub{font-size:13px;color:var(--text2);text-align:center;margin-bottom:28px}
+.fg{margin-bottom:16px}
+.fl{display:block;font-size:13px;font-weight:500;color:var(--text);margin-bottom:6px}
+.fi{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:14px;background:var(--bg);color:var(--text);outline:none;transition:border-color .15s}
+.fi:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.08)}
+.fi::placeholder{color:var(--text3)}
+select.fi{cursor:pointer}
+textarea.fi{resize:vertical;line-height:1.55}
+.btn{padding:10px 18px;border:none;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-p{background:var(--accent);color:#fff;width:100%}
+.btn-p:hover{background:var(--accent-dark)}
+.btn-sm{padding:6px 13px;font-size:12px}
+.auth-note{text-align:center;font-size:11px;color:var(--text3);margin-top:12px}
+#onboarding{flex:1;display:none;align-items:center;justify-content:center;background:linear-gradient(135deg,#f0f0ff,#fff,#f0fff8);padding:20px;overflow-y:auto}
+.ob-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-xl);padding:40px;width:100%;max-width:540px;box-shadow:var(--shadow-md)}
+.ob-step{display:none}.ob-step.active{display:block}
+.ob-prog{display:flex;gap:6px;margin-bottom:28px}
+.ob-dot{flex:1;height:4px;background:var(--border);border-radius:99px;transition:background .3s}
+.ob-dot.done{background:var(--accent)}
+.ob-title{font-size:20px;font-weight:700;letter-spacing:-.3px;margin-bottom:6px}
+.ob-sub{font-size:13px;color:var(--text2);margin-bottom:22px}
+.ob-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
+.ob-opt{padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius-lg);cursor:pointer;transition:all .15s;text-align:center}
+.ob-opt:hover,.ob-opt.sel{border-color:var(--accent);background:var(--accent-bg)}
+.ob-opt.sel{color:var(--accent)}
+.ob-opt-ico{font-size:22px;margin-bottom:5px}
+.ob-opt-lbl{font-size:12px;font-weight:600}
+.ob-connect{border:1.5px dashed var(--border2);border-radius:var(--radius-lg);padding:18px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:10px}
+.ob-connect:hover{border-color:var(--accent);background:var(--accent-bg)}
+.ob-connect.connected{border-color:var(--green);background:var(--green-bg)}
+.ob-foot{display:flex;align-items:center;justify-content:space-between;margin-top:20px}
+.ob-skip{font-size:12px;color:var(--text3);cursor:pointer}.ob-skip:hover{color:var(--text2)}
+#app{display:none;flex:1;flex-direction:column;overflow:hidden}
+.topbar{height:var(--topbar);background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:14px;flex-shrink:0;box-shadow:var(--shadow)}
+.tlogo{display:flex;align-items:center;gap:8px;width:var(--sidebar);flex-shrink:0}
+.lmark{width:26px;height:26px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px}
+.ltext{font-size:14px;font-weight:700;letter-spacing:-.3px}
+.lpill{background:var(--accent-bg);color:var(--accent);border-radius:20px;padding:2px 8px;font-size:9px;font-weight:700;border:1px solid rgba(99,102,241,.25)}
+.tsearch{flex:1;max-width:300px;position:relative}
+.tsearch input{width:100%;padding:7px 12px 7px 32px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;background:var(--bg2);color:var(--text);outline:none;transition:all .15s}
+.tsearch input:focus{border-color:var(--accent);background:var(--bg)}
+.s-ico{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:12px;pointer-events:none}
+.tr{margin-left:auto;display:flex;align-items:center;gap:8px}
+.tbtn{padding:6px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;background:var(--bg);transition:all .15s}
+.tbtn:hover{background:var(--bg3)}
+.tbtn.ac{color:var(--accent);border-color:rgba(99,102,241,.3);background:var(--accent-bg)}
+.uav{width:30px;height:30px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;cursor:pointer;flex-shrink:0}
+.body{display:flex;flex:1;overflow:hidden;min-height:0}
+.sidebar{width:var(--sidebar);background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;padding:10px 0}
+.nlbl{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.9px;padding:10px 14px 4px}
+.ni{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--radius);cursor:pointer;font-size:12px;font-weight:500;color:var(--text2);transition:all .15s;margin:0 6px 1px;user-select:none}
+.ni:hover{background:var(--bg3);color:var(--text)}
+.ni.on{background:var(--accent-bg);color:var(--accent)}
+.ni .nb{margin-left:auto;font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px}
+.sbfoot{margin-top:auto;padding:12px;border-top:1px solid var(--border)}
+.plan-card{background:var(--accent-bg);border-radius:var(--radius-lg);padding:12px;text-align:center}
+.plan-card h4{font-size:11px;font-weight:600;color:var(--accent);margin-bottom:3px}
+.plan-card p{font-size:10px;color:var(--text2);margin-bottom:8px;line-height:1.5}
+.plan-card button{background:var(--accent);color:#fff;padding:6px 14px;border-radius:var(--radius);font-size:11px;font-weight:600;width:100%;border:none;cursor:pointer}
+.main{flex:1;overflow-y:auto;padding:22px;min-width:0}
+.page{display:none}.page.on{display:block}
+.ptitle{font-size:19px;font-weight:700;letter-spacing:-.4px;margin-bottom:4px}
+.psub{font-size:13px;color:var(--text2);margin-bottom:20px}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;box-shadow:var(--shadow)}
+.card-sm{padding:14px}
+.chd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.ctitle{font-size:13px;font-weight:600}
+.tag{padding:2px 9px;border-radius:20px;font-size:10px;font-weight:500;display:inline-block}
+.t-g{background:var(--green-bg);color:#065f46}.t-r{background:var(--red-bg);color:#991b1b}
+.t-a{background:var(--amber-bg);color:#92400e}.t-b{background:var(--blue-bg);color:#1e40af}.t-p{background:var(--accent-bg);color:#3730a3}
+.klbl{font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
+.metric{font-size:24px;font-weight:700;letter-spacing:-.5px;line-height:1}
+.delta{font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px;display:inline-flex;align-items:center;gap:2px;margin-top:5px}
+.up{background:var(--green-bg);color:#065f46}.dn{background:var(--red-bg);color:#991b1b}.neu{background:var(--bg3);color:var(--text2)}
+.spark{height:26px;display:flex;align-items:flex-end;gap:2px;margin-top:8px}
+.sp{flex:1;border-radius:2px;min-height:3px}
+.banner{background:#0f0f11;border-radius:var(--radius-xl);padding:20px 22px;margin-bottom:20px}
+.blbl{font-size:9px;font-weight:600;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.9px;margin-bottom:9px}
+.btxt{font-size:14px;line-height:1.75;color:rgba(255,255,255,.87)}
+.bpills{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.bpill{border-radius:20px;padding:3px 11px;font-size:11px;border:1px solid}
+.bpill.g{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.25);color:#6ee7b7}
+.bpill.r{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.25);color:#fca5a5}
+.bpill.a{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.25);color:#fcd34d}
+.bpill.w{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.65)}
+.ring-wrap{position:relative;display:inline-flex;align-items:center;justify-content:center}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-center{position:absolute;text-align:center}
+.ring-num{font-size:26px;font-weight:700;letter-spacing:-.5px;line-height:1}
+.ring-lbl{font-size:9px;color:var(--text3);margin-top:1px}
+.sc-row{display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:1px solid var(--border)}
+.sc-row:last-child{border:none}
+.sc-lbl{font-size:12px;color:var(--text2);flex:1}
+.sc-bar{width:90px;height:4px;background:var(--bg3);border-radius:99px;overflow:hidden;flex-shrink:0}
+.sc-fill{height:100%;border-radius:99px}
+.sc-val{font-size:12px;font-weight:600;min-width:22px;text-align:right}
+.insight{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
+.insight:last-child{border:none}
+.ins-ico{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px}
+.ins-title{font-size:13px;font-weight:500;margin-bottom:2px}
+.ins-sub{font-size:11px;color:var(--text3)}
+.action{display:flex;gap:10px;padding:12px;border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--bg)}
+.action-num{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.action-title{font-size:12px;font-weight:600;margin-bottom:3px}
+.action-desc{font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:7px}
+.action-foot{display:flex;align-items:center;gap:7px}
+.chk{width:19px;height:19px;border:1.5px solid var(--border2);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer;transition:all .15s;margin-left:auto;color:transparent;flex-shrink:0}
+.chk:hover{border-color:var(--green);color:var(--green)}.chk.done{background:var(--green);border-color:var(--green);color:#fff}
+.barchart{display:flex;flex-direction:column;gap:8px}
+.brow{display:flex;align-items:center;gap:9px}
+.blbl2{width:80px;font-size:11px;color:var(--text2);text-align:right;flex-shrink:0}
+.btrack{flex:1;height:18px;background:var(--bg3);border-radius:4px;overflow:hidden}
+.bfill{height:100%;border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:9px;font-weight:600;color:#fff}
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - var(--topbar) - 240px);min-height:300px}
+.chat-msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding-bottom:12px}
+.msg{display:flex;gap:8px;max-width:85%}
+.msg.u{align-self:flex-end;flex-direction:row-reverse}
+.mav{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700}
+.mav.ai{background:var(--accent-bg);color:var(--accent)}.mav.u{background:var(--text);color:#fff}
+.bub{padding:10px 13px;border-radius:var(--radius-lg);font-size:13px;line-height:1.65}
+.bub.ai{background:var(--bg);border:1px solid var(--border);color:var(--text)}
+.bub.u{background:var(--accent);color:#fff}
+.bub.err{background:var(--red-bg);border:1px solid rgba(239,68,68,.2);color:#991b1b;font-size:12px}
+.chat-foot{padding-top:12px;border-top:1px solid var(--border);margin-top:auto}
+.chat-row{display:flex;gap:8px}
+.chat-ta{flex:1;padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--radius-lg);font-size:13px;resize:none;outline:none;line-height:1.5;max-height:110px;background:var(--bg);color:var(--text);transition:border-color .15s}
+.chat-ta:focus{border-color:var(--accent)}
+.send-btn{padding:10px 16px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-lg);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s}
+.send-btn:hover{background:var(--accent-dark)}.send-btn:disabled{background:var(--text3);cursor:not-allowed}
+.sugs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.sug{padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-size:11px;color:var(--text2);cursor:pointer;background:var(--bg);transition:all .15s}
+.sug:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.typing{display:flex;gap:3px;align-items:center;padding:12px}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--text3);animation:blink .9s infinite}
+.dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
+@keyframes blink{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:18px}
+.tab{padding:9px 15px;font-size:12px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.tab:hover{color:var(--text2)}.tab.on{color:var(--accent);border-bottom-color:var(--accent)}
+.form-g{margin-bottom:14px}
+.form-l{display:block;font-size:12px;font-weight:500;color:var(--text);margin-bottom:5px}
+.form-i{width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:13px;background:var(--bg);color:var(--text);outline:none;transition:border-color .15s}
+.form-i:focus{border-color:var(--accent)}
+textarea.form-i{resize:none;line-height:1.55}
+select.form-i{cursor:pointer}
+.drop{border:2px dashed var(--border2);border-radius:var(--radius-xl);padding:36px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg)}
+.drop:hover,.drop.drag{border-color:var(--accent);background:var(--accent-bg)}
+.ftags{display:flex;gap:6px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+.ftag{padding:3px 10px;background:var(--bg3);border-radius:20px;font-size:10px;font-weight:500;color:var(--text2)}
+.int-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.int-card{border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;text-align:center;background:var(--bg)}
+.int-logo{width:38px;height:38px;border-radius:9px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff}
+.int-name{font-size:12px;font-weight:600;margin-bottom:3px}
+.int-desc{font-size:10px;color:var(--text3);margin-bottom:10px}
+.int-btn{padding:5px 14px;border-radius:var(--radius);font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid;width:100%;transition:all .15s}
+.int-btn.live{background:var(--accent);color:#fff;border-color:var(--accent)}.int-btn.live:hover{background:var(--accent-dark)}
+.int-btn.coming{background:var(--bg3);color:var(--text3);border-color:var(--border);cursor:default}
+.int-btn.connected{background:var(--green-bg);color:#065f46;border-color:rgba(16,185,129,.3)}
+.price-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.price-card{border:1.5px solid var(--border);border-radius:var(--radius-xl);padding:22px;background:var(--bg);position:relative}
+.price-card.pop{border-color:var(--accent)}
+.pop-badge{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:3px 13px;border-radius:20px;white-space:nowrap}
+.price-name{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.price-amt{font-size:28px;font-weight:700;letter-spacing:-.5px}
+.price-per{font-size:12px;color:var(--text3)}
+.price-desc{font-size:12px;color:var(--text2);margin:8px 0 14px;line-height:1.55}
+.price-feats{list-style:none;margin-bottom:16px}
+.pf{font-size:12px;padding:5px 0;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--border);color:var(--text2)}
+.pf:last-child{border:none}.pf::before{content:"checkmark";color:var(--green);font-weight:700;font-size:10px;flex-shrink:0}
+.price-btn{width:100%;padding:10px;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid var(--border2);background:var(--bg);color:var(--text);transition:all .15s}
+.price-btn:hover{border-color:var(--accent);color:var(--accent)}
+.price-btn.pop{background:var(--accent);color:#fff;border-color:transparent}.price-btn.pop:hover{background:var(--accent-dark)}
+.aibar{display:flex;align-items:center;gap:8px;padding:10px 13px;background:var(--accent-bg);border:1px solid rgba(99,102,241,.2);border-radius:var(--radius-lg);font-size:12px;color:#3730a3;margin-bottom:14px}
+.aipulse{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 1.4s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+.notice{border-radius:var(--radius);padding:10px 13px;font-size:12px;line-height:1.6}
+.notice.warn{background:var(--red-bg);border:1px solid rgba(239,68,68,.2);color:#991b1b}
+.notice.info{background:var(--accent-bg);border:1px solid rgba(99,102,241,.2);color:#3730a3}
+.notice.good{background:var(--green-bg);border:1px solid rgba(16,185,129,.2);color:#065f46}
+.notice.amber{background:var(--amber-bg);border:1px solid rgba(245,158,11,.2);color:#92400e}
+.toast{position:fixed;bottom:22px;right:22px;background:#0f0f11;color:#fff;padding:12px 18px;border-radius:var(--radius-lg);font-size:13px;font-weight:500;z-index:9999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;max-width:340px;box-shadow:var(--shadow-md)}
+.toast.show{opacity:1;transform:translateY(0)}
+.comp-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px}
+.comp-hd{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.comp-av{width:32px;height:32px;background:var(--bg3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text2);flex-shrink:0}
+.brief-sec{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px}
+.brief-lbl{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.brief-item{display:flex;align-items:flex-start;gap:8px;font-size:13px;margin-bottom:8px}
+.bot-preview{background:#0f0f11;border-radius:var(--radius-lg);padding:14px}
+.bot-msgs{max-height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.bot-msg-ai{padding:9px 11px;background:rgba(255,255,255,.08);border-radius:8px;font-size:12px;color:rgba(255,255,255,.85);line-height:1.6}
+.bot-msg-u{display:flex;justify-content:flex-end}
+.bot-msg-u span{padding:8px 11px;background:#6366f1;border-radius:8px;font-size:12px;color:#fff;max-width:80%}
+.bot-inp-row{display:flex;gap:7px}
+.bot-inp{flex:1;padding:8px 11px;border:1px solid rgba(255,255,255,.15);border-radius:8px;font-size:12px;background:rgba(255,255,255,.07);color:#fff;outline:none}
+.bot-inp::placeholder{color:rgba(255,255,255,.35)}
+.bot-send{padding:8px 13px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer}
+@media(max-width:900px){.sidebar{display:none}.g4{grid-template-columns:repeat(2,1fr)}.price-grid,.int-grid{grid-template-columns:1fr}}
+@media(max-width:560px){.g2,.g3{grid-template-columns:1fr}.tsearch{display:none}}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<!-- AUTH -->
+<div id="auth">
+<div class="auth-box">
+<div class="auth-logo"><div class="auth-mark">G</div><span class="auth-name">GrowthOS</span></div>
+<div class="auth-title">Welcome to GrowthOS</div>
+<div class="auth-sub">Your AI-powered business executive assistant</div>
+<div class="fg"><label class="fl">Your name</label><input type="text" class="fi" id="l-name" placeholder="Sarah Al Rashidi" onkeydown="if(event.key==='Enter')doLogin()"></div>
+<div class="fg"><label class="fl">Company name</label><input type="text" class="fi" id="l-co" placeholder="Radica Creative Studio" onkeydown="if(event.key==='Enter')doLogin()"></div>
+<div class="fg"><label class="fl">Industry</label><select class="fi" id="l-ind"><option>Marketing Agency</option><option>Consultancy</option><option>E-commerce</option><option>Service Business</option><option>Tech Startup</option><option>Restaurant / F&B</option><option>Retail</option><option>Other</option></select></div>
+<button class="btn btn-p" onclick="doLogin()">Enter GrowthOS →</button>
+<div class="auth-note">Beta access · No password needed during testing</div>
+</div>
+</div>
+
+<!-- ONBOARDING -->
+<div id="onboarding">
+<div class="ob-box">
+<div class="ob-prog"><div class="ob-dot done" id="od1"></div><div class="ob-dot" id="od2"></div><div class="ob-dot" id="od3"></div></div>
+<div class="ob-step active" id="ob1">
+<div class="ob-title">Tell us about your business 👋</div>
+<div class="ob-sub">This helps GrowthOS personalise your dashboard and AI insights from day one.</div>
+<div class="form-g"><label class="form-l">Monthly revenue (approximate)</label><select class="form-i" id="ob-rev"><option value="">Select range</option><option>Under AED 30K</option><option>AED 30K – 100K</option><option>AED 100K – 300K</option><option>AED 300K – 500K</option><option>Over AED 500K</option></select></div>
+<div class="form-g"><label class="form-l">Number of active clients</label><select class="form-i" id="ob-cli"><option value="">Select range</option><option>1 – 5 clients</option><option>6 – 15 clients</option><option>16 – 30 clients</option><option>30+ clients</option></select></div>
+<div class="form-g"><label class="form-l">Biggest challenge right now</label><select class="form-i" id="ob-chal"><option value="">Select one</option><option>Getting more leads</option><option>Converting leads to clients</option><option>Managing cash flow</option><option>Retaining clients</option><option>Scaling the team</option><option>Tracking business performance</option></select></div>
+<div class="ob-foot"><span class="ob-skip" onclick="skipOb()">Skip setup</span><button class="btn btn-p" style="width:auto;padding:9px 22px" onclick="obGo(2)">Next →</button></div>
+</div>
+<div class="ob-step" id="ob2">
+<div class="ob-title">What are you focused on? 🎯</div>
+<div class="ob-sub">Choose your top goals for the next 3 months.</div>
+<div class="ob-grid" id="ob-goals-grid">
+<div class="ob-opt" onclick="togGoal(this)"><div class="ob-opt-ico">💰</div><div class="ob-opt-lbl">Increase revenue</div></div>
+<div class="ob-opt" onclick="togGoal(this)"><div class="ob-opt-ico">🎯</div><div class="ob-opt-lbl">Generate more leads</div></div>
+<div class="ob-opt" onclick="togGoal(this)"><div class="ob-opt-ico">👥</div><div class="ob-opt-lbl">Retain more clients</div></div>
+<div class="ob-opt" onclick="togGoal(this)"><div class="ob-opt-ico">📱</div><div class="ob-opt-lbl">Grow social media</div></div>
+<div class="ob-opt" onclick="togGoal(this)"><div class="ob-opt-ico">⚡</div><div class="ob-opt-lbl">Save time on admin</div></div>
+<div class="ob-opt" onclick="togGoal(this)"><div class="ob-opt-ico">📊</div><div class="ob-opt-lbl">Understand my data</div></div>
+</div>
+<div class="ob-foot"><span class="ob-skip" onclick="obGo(1)">← Back</span><button class="btn btn-p" style="width:auto;padding:9px 22px" onclick="obGo(3)">Next →</button></div>
+</div>
+<div class="ob-step" id="ob3">
+<div class="ob-title">Connect your data 🔗</div>
+<div class="ob-sub">Choose how you want to bring your business data into GrowthOS.</div>
+<div class="ob-connect" id="ob-zoho-btn" onclick="obConnectZoho()">
+<div style="font-size:24px;margin-bottom:7px">🔗</div>
+<div style="font-size:13px;font-weight:600;margin-bottom:3px">Connect Zoho</div>
+<div style="font-size:11px;color:var(--text2)">Live sync from Zoho CRM + Books + Social. Updates every hour automatically.</div>
+<div style="margin-top:8px"><span class="tag t-g" id="ob-zoho-tag">Recommended</span></div>
+</div>
+<div style="text-align:center;font-size:12px;color:var(--text3);margin:10px 0">or</div>
+<div class="ob-connect" onclick="obUpload()">
+<div style="font-size:24px;margin-bottom:7px">⬆️</div>
+<div style="font-size:13px;font-weight:600;margin-bottom:3px">Upload data manually</div>
+<div style="font-size:11px;color:var(--text2)">Upload CSV or Excel files whenever you want to update your data.</div>
+</div>
+<div style="text-align:center;margin-top:10px"><span class="ob-skip" onclick="skipOb()">Skip for now — explore with demo data</span></div>
+<div class="ob-foot" style="margin-top:16px;justify-content:flex-start"><span class="ob-skip" onclick="obGo(2)">← Back</span></div>
+</div>
+</div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+<div id="api-bar" style="display:none;background:#0f0f11;color:rgba(255,255,255,.8);align-items:center;justify-content:center;gap:10px;padding:9px 18px;font-size:12px;font-weight:500;flex-shrink:0">
+  <span style="color:#fcd34d">⚡ Add your Anthropic API key to the HTML file to enable AI features</span>
+  <a href="https://console.anthropic.com" target="_blank" style="color:#a5b4fc;text-decoration:none;font-weight:600">Get key →</a>
+</div>
+<div class="topbar">
+<div class="tlogo"><div class="lmark">G</div><span class="ltext">GrowthOS</span><span class="lpill">BETA</span></div>
+<div class="tsearch"><span class="s-ico">🔍</span><input type="text" placeholder="Ask anything about your business…" onkeydown="if(event.key==='Enter'&&this.value.trim()){showPage('advisor');setTimeout(()=>{document.getElementById('chat-input').value=this.value;this.value='';sendMsg()},200)}"></div>
+<div class="tr">
+<button class="tbtn" onclick="showPage('upload')">&#x2B06; Upload</button>
+<button class="tbtn ac" onclick="showPage('advisor')">🤖 Ask AI</button>
+<div class="uav" id="uav" onclick="showPage('settings')">M</div>
+</div>
+</div>
+<div class="body">
+<div class="sidebar">
+<div class="nlbl">Overview</div>
+<div class="ni on" onclick="showPage('dashboard',this)">📊 Executive Dashboard</div>
+<div class="ni" onclick="showPage('morning',this)">🌅 Morning Briefing</div>
+<div class="ni" onclick="showPage('advisor',this)">🤖 AI Business Advisor</div>
+<div class="nlbl">Intelligence</div>
+<div class="ni" onclick="showPage('finance',this)">💰 Finance</div>
+<div class="ni" onclick="showPage('leads',this)">🎯 Lead Intelligence <span class="nb" style="background:var(--amber);color:#fff" id="leads-badge"></span></div>
+<div class="ni" onclick="showPage('competitors',this)">🔍 Competitor Watch</div>
+<div class="nlbl">Content</div>
+<div class="ni" onclick="showPage('content',this)">✍️ Content Studio</div>
+<div class="ni" onclick="showPage('performance',this)">📊 Performance Tracker</div>
+<div class="ni" onclick="showPage('salesbot',this)">🤖 AI Sales Bot</div>
+<div class="nlbl">Data</div>
+<div class="ni" onclick="showPage('upload',this)">⬆️ Upload Data</div>
+<div class="ni" onclick="showPage('connect',this)">🔗 Connect Data</div>
+<div class="nlbl">Account</div>
+<div class="ni" onclick="showPage('pricing',this)">💳 Plans &amp; Billing</div>
+<div class="ni" onclick="showPage('settings',this)">⚙️ Settings</div>
+<div class="sbfoot"><div class="plan-card" id="sb-plan"><h4>You&#39;re in Beta 🎉</h4><p>Full launch coming soon. Upgrade to unlock live integrations.</p><button onclick="showPage('pricing')">See plans</button></div></div>
+</div>
+<div class="main" id="main">
+<div class="page on" id="page-dashboard">
+<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px">
+<div><div class="ptitle" id="dash-greet">Good morning 👋</div><div style="font-size:13px;color:var(--text2)">Here&#39;s what&#39;s happening in your business today</div></div>
+<div style="display:flex;gap:8px"><button class="tbtn" onclick="showPage('upload')">&#x2B06; Upload data</button><button class="btn btn-p btn-sm" onclick="showPage('advisor')">🤖 Ask AI advisor</button></div>
+</div>
+<div class="banner">
+<div class="blbl">🤖 AI Executive Summary · Personalised to your business</div>
+<div class="btxt" id="dash-summary">Add your business context in the AI Advisor and upload your data to see a personalised AI summary of what&#39;s happening in your business. The more data you connect, the smarter your dashboard becomes.</div>
+<div class="bpills" id="dash-pills"></div>
+</div>
+<div class="g4" style="margin-bottom:16px">
+<div class="card card-sm"><div class="klbl">Monthly Revenue</div><div class="metric" id="k-rev">—</div><div class="delta neu" id="k-rev-d">No data yet</div></div>
+<div class="card card-sm"><div class="klbl">New Leads</div><div class="metric" id="k-leads">—</div><div class="delta neu" id="k-leads-d">No data yet</div></div>
+<div class="card card-sm"><div class="klbl">Conversion Rate</div><div class="metric" id="k-conv">—</div><div class="delta neu" id="k-conv-d">No data yet</div></div>
+<div class="card card-sm"><div class="klbl">Satisfaction</div><div class="metric" id="k-sat">—</div><div class="delta neu" id="k-sat-d">No data yet</div></div>
+</div>
+<div class="g2" style="margin-bottom:16px">
+<div class="card">
+<div class="chd"><div class="ctitle">Business Health Score</div><span class="tag t-p" id="health-tag">Waiting for data</span></div>
+<div style="display:flex;align-items:center;gap:18px">
+<div class="ring-wrap"><svg width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="36" fill="none" stroke="#f0f0f2" stroke-width="7"/><circle cx="45" cy="45" r="36" fill="none" stroke="#6366f1" stroke-width="7" stroke-dasharray="226.2" stroke-dashoffset="226.2" stroke-linecap="round" id="health-ring"/></svg><div class="ring-center"><div class="ring-num" id="health-score">—</div><div class="ring-lbl">/ 100</div></div></div>
+<div style="flex:1">
+<div class="sc-row"><span class="sc-lbl">Revenue</span><div class="sc-bar"><div class="sc-fill" id="hb-rev" style="background:var(--green);width:0%"></div></div><span class="sc-val" id="hv-rev">—</span></div>
+<div class="sc-row"><span class="sc-lbl">Leads</span><div class="sc-bar"><div class="sc-fill" id="hb-leads" style="background:var(--accent);width:0%"></div></div><span class="sc-val" id="hv-leads">—</span></div>
+<div class="sc-row"><span class="sc-lbl">Finance</span><div class="sc-bar"><div class="sc-fill" id="hb-fin" style="background:var(--accent);width:0%"></div></div><span class="sc-val" id="hv-fin">—</span></div>
+<div class="sc-row"><span class="sc-lbl">Content</span><div class="sc-bar"><div class="sc-fill" id="hb-cont" style="background:var(--amber);width:0%"></div></div><span class="sc-val" id="hv-cont">—</span></div>
+</div>
+</div>
+<div class="notice info" style="margin-top:14px">Upload your data or connect Zoho to see your real business health score.</div>
+</div>
+<div class="card">
+<div class="chd"><div class="ctitle">Key Insights</div><span class="tag t-p">AI generated</span></div>
+<div id="insights-list">
+<div class="insight"><div class="ins-ico" style="background:var(--accent-bg)">💡</div><div><div class="ins-title">How to get started</div><div class="ins-sub">Go to AI Advisor and paste your business details. The AI will give you specific advice immediately, no data upload needed.</div></div></div>
+<div class="insight"><div class="ins-ico" style="background:var(--green-bg)">📊</div><div><div class="ins-title">Upload your data</div><div class="ins-sub">Upload your sales, leads, or expense CSV to see real numbers on your dashboard.</div></div></div>
+<div class="insight"><div class="ins-ico" style="background:var(--amber-bg)">🔗</div><div><div class="ins-title">Connect Zoho for live sync</div><div class="ins-sub">Connect your Zoho account and your dashboard updates automatically every hour.</div></div></div>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="chd"><div class="ctitle">Getting Started</div><span class="tag t-p">3 steps</span></div>
+<div class="g3">
+<div class="action"><div class="action-num" style="background:var(--accent-bg);color:var(--accent)">1</div><div style="flex:1"><div class="action-title">Set up AI Advisor</div><div class="action-desc">Paste your business details in the context box for personalised AI advice immediately.</div><div class="action-foot"><button onclick="showPage('advisor')" style="padding:4px 10px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);font-size:11px;font-weight:600;cursor:pointer">Open →</button><div class="chk" onclick="this.classList.toggle('done')">&#x2713;</div></div></div></div>
+<div class="action"><div class="action-num" style="background:var(--green-bg);color:var(--green)">2</div><div style="flex:1"><div class="action-title">Upload your data</div><div class="action-desc">Add your sales or leads CSV so your dashboard shows your real numbers.</div><div class="action-foot"><button onclick="showPage('upload')" style="padding:4px 10px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);font-size:11px;font-weight:600;cursor:pointer">Upload →</button><div class="chk" onclick="this.classList.toggle('done')">&#x2713;</div></div></div></div>
+<div class="action"><div class="action-num" style="background:var(--amber-bg);color:var(--amber)">3</div><div style="flex:1"><div class="action-title">Connect Zoho</div><div class="action-desc">Connect Zoho for live automatic data sync. No more manual uploads ever.</div><div class="action-foot"><button onclick="showPage('connect')" style="padding:4px 10px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);font-size:11px;font-weight:600;cursor:pointer">Connect →</button><div class="chk" onclick="this.classList.toggle('done')">&#x2713;</div></div></div></div>
+</div>
+</div>
+</div>
+<div class="page" id="page-morning">
+<div class="ptitle" id="morning-title">Good morning ☀️</div>
+<div class="psub" id="morning-date">Your personalised daily briefing</div>
+<div style="background:#0f0f11;color:#fff;border-radius:var(--radius-xl);padding:20px 22px;margin-bottom:16px">
+<div style="font-size:9px;font-weight:600;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.9px;margin-bottom:9px">🎯 YOUR ONE FOCUS TODAY</div>
+<div id="mf-title" style="font-size:15px;font-weight:600;margin-bottom:5px">Add your business context in AI Advisor to get a personalised daily focus.</div>
+<div id="mf-sub" style="font-size:12px;color:rgba(255,255,255,.55);line-height:1.65">Once connected, GrowthOS tells you the single most important thing to do each morning based on your real business data.</div>
+</div>
+<div class="g2" style="margin-bottom:14px">
+<div class="brief-sec"><div class="brief-lbl">📅 Today</div><div id="m-today"><div class="brief-item"><span style="color:var(--text3)">→</span><span style="color:var(--text2)">Add your context to see today&#39;s priorities</span></div></div></div>
+<div class="brief-sec"><div class="brief-lbl">⚠️ Needs Attention</div><div id="m-attention"><div class="brief-item"><span style="color:var(--text3)">●</span><span style="color:var(--text2)">Upload data to see what needs your attention today</span></div></div></div>
+</div>
+<div class="g2" style="margin-bottom:14px">
+<div class="brief-sec"><div class="brief-lbl">💡 Opportunity</div><div id="m-opp" style="font-size:13px;color:var(--text2);line-height:1.6">Connect your data to unlock daily AI-generated opportunities for your business.</div></div>
+<div class="brief-sec"><div class="brief-lbl">📊 Your Pulse</div><div id="m-pulse" style="font-size:13px;color:var(--text2);display:flex;flex-direction:column;gap:8px"><div style="display:flex;justify-content:space-between"><span>Revenue</span><span style="color:var(--text3)">No data</span></div><div style="display:flex;justify-content:space-between"><span>Leads</span><span style="color:var(--text3)">No data</span></div><div style="display:flex;justify-content:space-between"><span>Health Score</span><span style="color:var(--text3)">No data</span></div></div></div>
+</div>
+<div style="padding:13px 15px;background:var(--accent-bg);border:1px solid rgba(99,102,241,.2);border-radius:var(--radius-lg);font-size:12px;color:#3730a3;line-height:1.65;margin-bottom:14px">🌍 <strong>UAE Insight:</strong> Q3 business setup season peaks in July — 40% more new company registrations. Best time to target founders who need branding, marketing, and business services.</div>
+<button onclick="genMorning()" style="width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer">🤖 Generate AI Morning Brief</button>
+<div id="morning-out" style="margin-top:14px"></div>
+</div>
+<div class="page" id="page-advisor">
+<div class="ptitle">🤖 AI Business Advisor</div>
+<div class="psub">Powered by Claude — ask anything about your business</div>
+<div class="card" style="margin-bottom:14px">
+<div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">Your Business Context <span style="font-size:10px;font-weight:400;color:var(--text3);text-transform:none;letter-spacing:0">— the AI reads this before every reply. More detail = better advice.</span></div>
+<textarea class="fi" id="biz-ctx" rows="5" style="font-size:12px;background:var(--bg2)" placeholder="Paste your business details here. Example:
+
+Business: Radica Creative Studio — Brand Strategy Agency, Dubai UAE
+Monthly revenue: AED 218,000 | Expenses: AED 134,000 | Net profit: AED 84,000
+Active clients: 6 | New leads this week: 14 | Uncontacted: 3
+Biggest challenge: Lead response time is 14 hours, target is 2 hours
+Goals: Hit AED 300K monthly revenue by Q4 2026
+Competitors: BrandMasters MENA just dropped pricing 15%"></textarea>
+<div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+<button onclick="saveCtx()" style="padding:7px 14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer">Save context</button>
+<span id="ctx-saved" style="font-size:11px;color:var(--green);display:none">✓ Saved</span>
+<span style="font-size:11px;color:var(--text3);margin-left:auto">Queries: <strong id="qcount" style="color:var(--text)">0</strong> / 50 this month</span>
+</div>
+</div>
+<div class="sugs">
+<div class="sug" onclick="useSug(this)">What should I focus on this week?</div>
+<div class="sug" onclick="useSug(this)">Which service is most profitable?</div>
+<div class="sug" onclick="useSug(this)">Why is my revenue not growing?</div>
+<div class="sug" onclick="useSug(this)">How do I get more leads?</div>
+<div class="sug" onclick="useSug(this)">Can I afford to hire someone?</div>
+<div class="sug" onclick="useSug(this)">What is my biggest risk right now?</div>
+</div>
+<div class="chat-wrap">
+<div class="chat-msgs" id="chat-msgs">
+<div class="msg"><div class="mav ai">G</div><div class="bub ai" id="welcome-msg">Hello! I&#39;m your GrowthOS AI Business Advisor, powered by Claude.<br><br>Paste your business details in the context box above and ask me anything. I&#39;ll give you specific, data-backed advice about your revenue, leads, pricing, cash flow, or strategy.</div></div>
+</div>
+<div class="chat-foot">
+<div class="chat-row">
+<textarea class="chat-ta" id="chat-input" placeholder="Ask about your business…" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"></textarea>
+<button class="send-btn" id="send-btn" onclick="sendMsg()">Send →</button>
+</div>
+</div>
+</div>
+</div>
+<div class="page" id="page-finance">
+<div class="ptitle">💰 Finance Intelligence</div>
+<div class="psub">Upload your financial CSV or connect Zoho Books for live analysis</div>
+<div class="notice info" style="margin-bottom:16px">📎 Upload your sales or expense CSV below, or <span style="font-weight:600;cursor:pointer;text-decoration:underline" onclick="showPage('connect')">connect Zoho Books</span> for automatic hourly updates.</div>
+<div class="g4" style="margin-bottom:16px">
+<div class="card card-sm"><div class="klbl">Total Revenue</div><div class="metric" id="f-rev">—</div><div class="delta neu" id="f-rev-d">No data yet</div></div>
+<div class="card card-sm"><div class="klbl">Total Expenses</div><div class="metric" id="f-exp">—</div><div class="delta neu" id="f-exp-d">No data yet</div></div>
+<div class="card card-sm"><div class="klbl">Net Profit</div><div class="metric" id="f-profit">—</div><div class="delta neu" id="f-profit-d">No data yet</div></div>
+<div class="card card-sm"><div class="klbl">Overdue Invoices</div><div class="metric" id="f-overdue">—</div><div class="delta neu" id="f-overdue-d">No data yet</div></div>
+</div>
+<div class="g2" style="margin-bottom:16px">
+<div class="card">
+<div class="chd"><div class="ctitle">Upload Financial Data</div></div>
+<div class="drop" id="fin-drop" onclick="document.getElementById('fin-file').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="dropFile(event,'finance')">
+<div style="font-size:32px;margin-bottom:9px">📊</div>
+<div style="font-size:14px;font-weight:600;margin-bottom:5px">Drop your CSV here</div>
+<div style="font-size:12px;color:var(--text2)">Sales report, invoice list, or expense sheet</div>
+<div class="ftags"><span class="ftag">Sales CSV</span><span class="ftag">Invoices</span><span class="ftag">Expenses</span></div>
+<input type="file" id="fin-file" accept=".csv,.xlsx,.xls" style="display:none" onchange="fileInput(event,'finance')">
+</div>
+<div id="fin-status" style="margin-top:10px"></div>
+</div>
+<div class="card">
+<div class="chd"><div class="ctitle">🤖 AI Finance Analysis</div><span class="tag t-p">From your data</span></div>
+<div id="fin-ai" style="font-size:13px;color:var(--text2);line-height:1.7">Upload your financial CSV and the AI will analyse revenue, expenses, profit margins, and overdue invoices — then give you specific recommendations.<br><br>Or <span style="color:var(--accent);cursor:pointer;font-weight:500" onclick="showPage('connect')">connect Zoho Books</span> for automatic daily updates.</div>
+</div>
+</div>
+<div class="card">
+<div class="chd"><div class="ctitle">🧾 Pricing Advisor</div><span class="tag t-p">AI powered</span></div>
+<div style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.6">Find out if you are undercharging. Enter your service details and get UAE market rate analysis instantly.</div>
+<div class="g2">
+<div>
+<div class="form-g"><label class="form-l">Service type</label><input type="text" class="form-i" id="pa-svc" placeholder="e.g. Brand strategy project, 4 weeks"></div>
+<div class="form-g"><label class="form-l">Client type</label><select class="form-i" id="pa-cli"><option>UAE SME / Startup</option><option>Mid-size company</option><option>Enterprise</option><option>Restaurant / F&B</option><option>E-commerce brand</option></select></div>
+<div class="form-g"><label class="form-l">Currently charging</label><input type="text" class="form-i" id="pa-curr" placeholder="e.g. AED 15,000"></div>
+<button onclick="getPricing()" class="btn btn-p">Get pricing advice</button>
+</div>
+<div id="pa-out" style="font-size:13px;line-height:1.75;color:var(--text);padding:14px;background:var(--bg2);border-radius:var(--radius);min-height:120px">Fill in your service details and click Get pricing advice.</div>
+</div>
+</div>
+</div>
+<div class="page" id="page-leads">
+<div class="ptitle">🎯 Lead Intelligence</div>
+<div class="psub">Upload your leads CSV or connect Zoho CRM for pipeline analysis and AI recommendations</div>
+<div class="notice info" style="margin-bottom:16px">📎 Upload your leads data below, or <span style="font-weight:600;cursor:pointer;text-decoration:underline" onclick="showPage('connect')">connect Zoho CRM</span> for live hourly sync.</div>
+<div class="g4" style="margin-bottom:16px">
+<div class="card card-sm"><div class="klbl">Total Leads</div><div class="metric" id="l-tot">—</div><div class="delta neu" id="l-tot-d">No data yet</div></div>
+<div class="card card-sm"><div class="klbl">Uncontacted</div><div class="metric" id="l-unc" style="color:var(--red)">—</div><div class="delta neu" id="l-unc-d">No data yet</div></div>
+<div class="card card-sm"><div class="klbl">Conversion Rate</div><div class="metric" id="l-conv">—</div><div class="delta neu" id="l-conv-d">No data yet</div></div>
+<div class="card card-sm"><div class="klbl">Pipeline Value</div><div class="metric" id="l-pipe">—</div><div class="delta neu" id="l-pipe-d">No data yet</div></div>
+</div>
+<div class="g2">
+<div class="card">
+<div class="chd"><div class="ctitle">Upload Leads Data</div></div>
+<div class="drop" id="leads-drop" onclick="document.getElementById('leads-file').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="dropFile(event,'leads')">
+<div style="font-size:32px;margin-bottom:9px">🎯</div>
+<div style="font-size:14px;font-weight:600;margin-bottom:5px">Drop your leads CSV here</div>
+<div style="font-size:12px;color:var(--text2)">CRM export, lead list, or pipeline report</div>
+<div class="ftags"><span class="ftag">Leads CSV</span><span class="ftag">CRM Export</span><span class="ftag">Pipeline</span></div>
+<input type="file" id="leads-file" accept=".csv,.xlsx,.xls" style="display:none" onchange="fileInput(event,'leads')">
+</div>
+<div id="leads-status" style="margin-top:10px"></div>
+</div>
+<div class="card">
+<div class="chd"><div class="ctitle">🤖 AI Lead Analysis</div><span class="tag t-p">From your data</span></div>
+<div id="leads-ai" style="font-size:13px;color:var(--text2);line-height:1.7">Upload your leads CSV and the AI will identify your best sources, flag uncontacted leads, calculate conversion rates, and tell you exactly who to follow up with today.<br><br>Or <span style="color:var(--accent);cursor:pointer;font-weight:500" onclick="showPage('connect')">connect Zoho CRM</span> for automatic hourly updates.</div>
+</div>
+</div>
+</div>
+<div class="page" id="page-competitors">
+<div class="ptitle">🔍 Competitor Watch</div>
+<div class="psub">Tell GrowthOS about your competitors — AI analyses their positioning and finds your opportunities</div>
+<div class="g2" style="margin-bottom:16px">
+<div class="card">
+<div class="chd" style="margin-bottom:16px"><div class="ctitle">Add a Competitor</div></div>
+<div class="form-g"><label class="form-l">Competitor name</label><input type="text" class="form-i" id="c-name" placeholder="e.g. BrandMasters MENA"></div>
+<div class="form-g"><label class="form-l">Their website</label><input type="text" class="form-i" id="c-url" placeholder="e.g. brandmastersmena.com"></div>
+<div class="form-g"><label class="form-l">What do you know about them?</label><textarea class="form-i" id="c-notes" rows="3" placeholder="e.g. Targets UAE startups, dropped pricing 15%, fast turnaround is their pitch, weaker on strategy depth…"></textarea></div>
+<div class="form-g"><label class="form-l">Your market</label><input type="text" class="form-i" id="c-market" placeholder="e.g. Brand strategy, Dubai UAE, SME market"></div>
+<button onclick="analyseComp()" class="btn btn-p">🔍 Analyse with AI</button>
+</div>
+<div class="card">
+<div class="chd"><div class="ctitle">AI Competitor Analysis</div><span class="tag t-p" id="comp-status">Waiting</span></div>
+<div id="comp-out" style="font-size:13px;color:var(--text2);line-height:1.75;min-height:200px">Add a competitor on the left and click Analyse — the AI will give you a positioning assessment, identify their weaknesses, and tell you exactly how to compete against them.</div>
+</div>
+</div>
+<div id="comp-history"></div>
+</div>
+<div class="page" id="page-content">
+<div class="ptitle">✍️ Content Studio</div>
+<div class="psub">Generate content ideas, campaign strategies, and full scripts — powered by AI</div>
+<div class="tabs"><div class="tab on" onclick="ctab(this,0)">💡 Ideas &amp; Campaigns</div><div class="tab" onclick="ctab(this,1)">✍️ Script &amp; Caption</div></div>
+<div id="ct0">
+<div class="aibar"><div class="aipulse"></div>AI Marketing Strategist — generating ideas based on your business context</div>
+<div class="g2" style="margin-bottom:14px">
+<div class="card">
+<div class="chd"><div class="ctitle">Generate Content Ideas</div></div>
+<div class="form-g"><label class="form-l">What do you want content about?</label><input type="text" class="form-i" id="ci-topic" placeholder="e.g. My brand strategy service, client results, UAE market tips"></div>
+<div class="g2" style="gap:10px;margin-bottom:12px">
+<div><label class="form-l">Platform</label><select class="form-i" id="ci-plat"><option>Instagram</option><option>LinkedIn</option><option>TikTok</option><option>All platforms</option></select></div>
+<div><label class="form-l">Goal</label><select class="form-i" id="ci-goal"><option>Get leads</option><option>Build awareness</option><option>Grow followers</option><option>Educate audience</option></select></div>
+</div>
+<button onclick="genIdeas()" class="btn btn-p">✨ Generate 5 ideas</button>
+</div>
+<div class="card"><div class="chd"><div class="ctitle">Recommended Campaigns</div><span class="tag t-p">For your business</span></div><div id="campaigns-out" style="font-size:13px;color:var(--text2);line-height:1.7">Click Generate to see AI-recommended campaigns based on your business context and goals.</div></div>
+</div>
+<div id="ideas-out"></div>
+</div>
+<div id="ct1" style="display:none">
+<div class="g2">
+<div class="card">
+<div class="chd" style="margin-bottom:16px"><div class="ctitle">Script Details</div></div>
+<div class="form-g"><label class="form-l">What is this content about?</label><textarea class="form-i" id="sc-topic" rows="3" placeholder="e.g. How we helped a Dubai restaurant increase leads by 340% in 60 days"></textarea></div>
+<div class="form-g"><label class="form-l">Content type</label><select class="form-i" id="sc-type"><option>Instagram carousel caption</option><option>Instagram Reel script</option><option>LinkedIn post</option><option>TikTok script</option><option>Email newsletter intro</option></select></div>
+<div class="form-g"><label class="form-l">Tone</label><select class="form-i" id="sc-tone"><option>Professional and confident</option><option>Casual and friendly</option><option>Bold and direct</option><option>Inspirational</option></select></div>
+<div class="form-g"><label class="form-l">Call to action</label><select class="form-i" id="sc-cta"><option>Book a discovery call</option><option>DM me for details</option><option>Comment below</option><option>Link in bio</option><option>Save this post</option></select></div>
+<button onclick="genScript()" class="btn btn-p">✍️ Generate script</button>
+</div>
+<div class="card">
+<div class="chd"><div class="ctitle">Your Script</div><span class="tag t-p" id="sc-status">Waiting</span></div>
+<div id="sc-out" style="font-size:13px;line-height:1.8;color:var(--text);white-space:pre-line;min-height:200px;background:var(--bg2);border-radius:var(--radius);padding:14px">Fill in the details and click Generate.</div>
+<button onclick="copyEl('sc-out')" style="margin-top:10px;width:100%;padding:8px;border:1px solid var(--border2);border-radius:var(--radius);font-size:12px;font-weight:500;color:var(--text2);background:var(--bg);cursor:pointer">📋 Copy script</button>
+</div>
+</div>
+</div>
+</div>
+<div class="page" id="page-performance">
+<div class="ptitle">📊 Performance Tracker</div>
+<div class="psub">Upload your Instagram or LinkedIn analytics CSV — AI analyses what is working and what is not</div>
+<div class="drop" id="perf-drop" onclick="document.getElementById('perf-file').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="dropFile(event,'performance')" style="margin-bottom:20px">
+<div style="font-size:36px;margin-bottom:10px">📊</div>
+<div style="font-size:14px;font-weight:600;margin-bottom:5px">Upload your analytics export</div>
+<div style="font-size:12px;color:var(--text2)">Export from Instagram Insights, LinkedIn Analytics, or TikTok Studio</div>
+<div class="ftags"><span class="ftag">Instagram Insights CSV</span><span class="ftag">LinkedIn Analytics</span><span class="ftag">TikTok Analytics</span></div>
+<input type="file" id="perf-file" accept=".csv,.xlsx,.xls" style="display:none" onchange="fileInput(event,'performance')">
+</div>
+<div id="perf-out"><div class="notice amber">No analytics uploaded yet. Export your Instagram Insights or LinkedIn Analytics CSV and upload it above — the AI will tell you your best content types, optimal posting times, and what is driving the most engagement.</div></div>
+</div>
+<div class="page" id="page-salesbot">
+<div class="ptitle">🤖 AI Sales Bot</div>
+<div class="psub">Train your AI receptionist — it answers questions, qualifies leads, and books calls 24/7 on your website</div>
+<div class="g2">
+<div class="card">
+<div class="chd" style="margin-bottom:16px"><div class="ctitle">Train Your Bot</div></div>
+<div class="form-g"><label class="form-l">Business name</label><input type="text" class="form-i" id="bot-biz" placeholder="e.g. Radica Creative Studio"></div>
+<div class="form-g"><label class="form-l">Services you offer</label><textarea class="form-i" id="bot-svcs" rows="3" placeholder="e.g. Brand strategy, social media management, content creation, SEO consulting"></textarea></div>
+<div class="form-g"><label class="form-l">Starting price</label><input type="text" class="form-i" id="bot-price" placeholder="e.g. Projects start from AED 10,000"></div>
+<div class="form-g"><label class="form-l">Bot personality</label><select class="form-i" id="bot-tone"><option>Friendly and professional</option><option>Casual and approachable</option><option>Formal and corporate</option></select></div>
+<div class="form-g"><label class="form-l">Bot actions</label>
+<div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--text2)">
+<label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="bot-ans" checked> Answer questions about your services</label>
+<label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="bot-qual" checked> Qualify leads (budget + timeline)</label>
+<label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="bot-book" checked> Offer to book a discovery call</label>
+</div>
+</div>
+<button onclick="activateBot()" class="btn btn-p" style="margin-top:6px">🤖 Activate Sales Bot</button>
+</div>
+<div>
+<div class="card" style="margin-bottom:12px">
+<div class="chd"><div class="ctitle">Live Preview</div><span class="tag t-g" id="bot-status">Preview mode</span></div>
+<div class="bot-preview">
+<div class="bot-msgs" id="bot-msgs"><div class="bot-msg-ai" id="bot-welcome">Hi! I&#39;m the virtual assistant for <strong id="bot-coname" style="color:#a5b4fc">your business</strong>. I can help you learn about our services and book a discovery call. What can I help you with today?</div></div>
+<div class="bot-inp-row"><input type="text" class="bot-inp" id="bot-inp" placeholder="Test your bot…" onkeydown="if(event.key==='Enter')testBot()"><button class="bot-send" onclick="testBot()">Send</button></div>
+</div>
+</div>
+<div class="card">
+<div class="ctitle" style="margin-bottom:8px">Embed on your website</div>
+<div style="font-size:12px;color:var(--text2);line-height:1.65;margin-bottom:10px">After activating, copy this snippet and paste it before the &lt;/body&gt; tag on your website. Works on Wix, Squarespace, WordPress, and Webflow.</div>
+<div id="embed-code" style="background:var(--bg3);border-radius:var(--radius);padding:12px;font-size:11px;font-family:monospace;color:var(--text2);line-height:1.6;word-break:break-all">Activate your bot first to generate the embed code.</div>
+<button onclick="copyEl('embed-code')" style="margin-top:8px;padding:6px 13px;border:1px solid var(--border2);border-radius:var(--radius);font-size:11px;font-weight:500;color:var(--text2);background:var(--bg);cursor:pointer">📋 Copy code</button>
+</div>
+</div>
+</div>
+</div>
+<div class="page" id="page-upload">
+<div class="ptitle">⬆️ Upload Data</div>
+<div class="psub">Upload your business files — AI analyses them and updates your dashboard automatically</div>
+<div class="drop" id="main-drop" onclick="document.getElementById('main-file').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="dropFile(event,'general')" style="margin-bottom:20px">
+<div style="font-size:36px;margin-bottom:10px">⬆️</div>
+<div style="font-size:14px;font-weight:600;margin-bottom:5px">Drop any business file here</div>
+<div style="font-size:12px;color:var(--text2)">CSV, Excel, or PDF — AI will read and analyse it instantly</div>
+<div class="ftags"><span class="ftag">📊 Sales</span><span class="ftag">🎯 Leads</span><span class="ftag">💸 Expenses</span><span class="ftag">📱 Analytics</span><span class="ftag">💬 Feedback</span></div>
+<input type="file" id="main-file" multiple accept=".csv,.xlsx,.xls,.pdf,.txt" style="display:none" onchange="fileInput(event,'general')">
+</div>
+<div id="upload-list" style="display:flex;flex-direction:column;gap:8px"></div>
+<div class="card" style="margin-top:16px">
+<div class="ctitle" style="margin-bottom:12px">What can you upload?</div>
+<div class="g3">
+<div style="font-size:12px"><div style="font-weight:600;margin-bottom:4px">📊 Sales Report</div><div style="color:var(--text2);line-height:1.55">Monthly revenue, invoices, payment status. AI shows revenue trends and who owes you money.</div></div>
+<div style="font-size:12px"><div style="font-weight:600;margin-bottom:4px">🎯 Leads Report</div><div style="color:var(--text2);line-height:1.55">Lead sources and response times. AI identifies best channels and who to follow up with.</div></div>
+<div style="font-size:12px"><div style="font-weight:600;margin-bottom:4px">💸 Expenses CSV</div><div style="color:var(--text2);line-height:1.55">Bank statement or expense report. AI categorises spending and finds where to cut costs.</div></div>
+<div style="font-size:12px"><div style="font-weight:600;margin-bottom:4px">📱 Social Analytics</div><div style="color:var(--text2);line-height:1.55">Instagram or LinkedIn export. AI tells you best content types and posting times.</div></div>
+<div style="font-size:12px"><div style="font-weight:600;margin-bottom:4px">💬 Feedback Data</div><div style="color:var(--text2);line-height:1.55">Survey responses or reviews. AI surfaces your top praise and complaints.</div></div>
+<div style="font-size:12px"><div style="font-weight:600;margin-bottom:4px">📄 Any report</div><div style="color:var(--text2);line-height:1.55">Any business document. Then ask the AI Advisor questions about it.</div></div>
+</div>
+</div>
+</div>
+<div class="page" id="page-connect">
+<div class="ptitle">🔗 Connect Data</div>
+<div class="psub">Connect your business tools for automatic sync — no manual uploads ever again</div>
+<div class="notice good" style="margin-bottom:20px">✓ Connected tools update your dashboard automatically every hour. Your data stays private and is never shared.</div>
+<div class="int-grid" style="margin-bottom:20px">
+<div class="int-card"><div class="int-logo" style="background:#E42527">Z</div><div class="int-name">Zoho CRM</div><div class="int-desc">Leads, clients, pipeline, deals</div><button class="int-btn live" onclick="connectZoho('crm')">Connect Zoho CRM</button></div>
+<div class="int-card"><div class="int-logo" style="background:#E42527">Z</div><div class="int-name">Zoho Books</div><div class="int-desc">Revenue, invoices, expenses</div><button class="int-btn live" onclick="connectZoho('books')">Connect Zoho Books</button></div>
+<div class="int-card"><div class="int-logo" style="background:#E42527">Z</div><div class="int-name">Zoho Social</div><div class="int-desc">Instagram, LinkedIn analytics</div><button class="int-btn live" onclick="connectZoho('social')">Connect Zoho Social</button></div>
+<div class="int-card"><div class="int-logo" style="background:#13b5ea">X</div><div class="int-name">Xero</div><div class="int-desc">Finance and invoicing</div><button class="int-btn coming">Coming soon</button></div>
+<div class="int-card"><div class="int-logo" style="background:#ff7a59">H</div><div class="int-name">HubSpot</div><div class="int-desc">CRM and leads</div><button class="int-btn coming">Coming soon</button></div>
+<div class="int-card"><div class="int-logo" style="background:#0f9d58">G</div><div class="int-name">Google Sheets</div><div class="int-desc">Custom data from spreadsheets</div><button class="int-btn coming">Coming soon</button></div>
+<div class="int-card"><div class="int-logo" style="background:#e37400">GA</div><div class="int-name">Google Analytics</div><div class="int-desc">Website traffic and conversions</div><button class="int-btn coming">Coming soon</button></div>
+<div class="int-card"><div class="int-logo" style="background:#1877f2">M</div><div class="int-name">Meta Ads</div><div class="int-desc">Ad spend, leads, ROAS</div><button class="int-btn coming">Coming soon</button></div>
+<div class="int-card"><div class="int-logo" style="background:#96bf48">S</div><div class="int-name">Shopify</div><div class="int-desc">Orders, revenue, products</div><button class="int-btn coming">Coming soon</button></div>
+</div>
+<div class="card">
+<div class="ctitle" style="margin-bottom:8px">Don&#39;t see your tool?</div>
+<div style="font-size:13px;color:var(--text2);margin-bottom:10px;line-height:1.6">We add new integrations every month. You can always upload a CSV export from any tool in the meantime.</div>
+<div style="display:flex;gap:8px"><input type="text" class="fi" placeholder="Suggest a tool to integrate…" id="suggest-inp" style="flex:1"><button onclick="suggestTool()" class="btn btn-p btn-sm">Suggest</button></div>
+</div>
+</div>
+<div class="page" id="page-pricing">
+<div class="ptitle">💳 Plans &amp; Billing</div>
+<div class="psub">Choose the plan that fits your business</div>
+<div style="background:var(--accent-bg);border:1px solid rgba(99,102,241,.3);border-radius:var(--radius-lg);padding:13px 16px;margin-bottom:22px;font-size:13px;color:#3730a3">🎉 You are a beta tester — you will get <strong>30% off</strong> your first 3 months when we launch. We will email you first.</div>
+<div class="price-grid">
+<div class="price-card">
+<div class="price-name">Starter</div>
+<div><span class="price-amt">AED 199</span><span class="price-per">/month</span></div>
+<div class="price-desc">For solo founders who need clarity on what&#39;s happening in their business.</div>
+<ul class="price-feats">
+<li class="pf">Executive Dashboard</li><li class="pf">Morning Briefing</li><li class="pf">AI Advisor — 50 queries/month</li><li class="pf">Finance Overview</li><li class="pf">Lead Intelligence</li><li class="pf">Manual data upload</li><li class="pf">1 user</li>
+</ul>
+<button class="price-btn" onclick="showToast('Payments launching soon — we will email you!')">Join waitlist</button>
+</div>
+<div class="price-card pop">
+<div class="pop-badge">Most popular</div>
+<div class="price-name">Growth</div>
+<div><span class="price-amt">AED 499</span><span class="price-per">/month</span></div>
+<div class="price-desc">For growing agencies and service businesses that want live data and full AI intelligence.</div>
+<ul class="price-feats">
+<li class="pf">Everything in Starter</li><li class="pf">AI Advisor — unlimited</li><li class="pf">Competitor Watch</li><li class="pf">Content Studio</li><li class="pf">Performance Tracker</li><li class="pf">AI Sales Bot</li><li class="pf">Zoho integration — live sync</li><li class="pf">3 users</li>
+</ul>
+<button class="price-btn pop" onclick="showToast('Payments launching soon — we will email you!')">Join waitlist</button>
+</div>
+<div class="price-card">
+<div class="price-name">Pro</div>
+<div><span class="price-amt">AED 999</span><span class="price-per">/month</span></div>
+<div class="price-desc">For established agencies managing teams and multiple clients at scale.</div>
+<ul class="price-feats">
+<li class="pf">Everything in Growth</li><li class="pf">Client Manager via Zoho</li><li class="pf">Multiple integrations</li><li class="pf">Multi-workspace</li><li class="pf">White-label reports</li><li class="pf">Priority WhatsApp support</li><li class="pf">10 users</li>
+</ul>
+<button class="price-btn" onclick="showToast('Contact us on WhatsApp to discuss Pro')">Contact sales</button>
+</div>
+</div>
+</div>
+<div class="page" id="page-settings">
+<div class="ptitle">⚙️ Settings</div>
+<div class="psub">Manage your profile and GrowthOS preferences</div>
+<div class="g2">
+<div class="card">
+<div class="chd" style="margin-bottom:16px"><div class="ctitle">Your Profile</div></div>
+<div class="form-g"><label class="form-l">Your name</label><input type="text" class="form-i" id="s-name"></div>
+<div class="form-g"><label class="form-l">Company</label><input type="text" class="form-i" id="s-co"></div>
+<div class="form-g"><label class="form-l">Industry</label><select class="form-i" id="s-ind"><option>Marketing Agency</option><option>Consultancy</option><option>E-commerce</option><option>Service Business</option><option>Tech Startup</option><option>Restaurant / F&B</option><option>Retail</option><option>Other</option></select></div>
+<div class="form-g"><label class="form-l">Monthly revenue target</label><input type="text" class="form-i" id="s-target" placeholder="e.g. AED 300,000"></div>
+<button onclick="saveSets()" class="btn btn-p">Save changes</button>
+</div>
+<div class="card">
+<div class="chd" style="margin-bottom:8px"><div class="ctitle">Beta Feedback</div></div>
+<div style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6">You are one of our first users. Your feedback directly shapes GrowthOS before we launch publicly.</div>
+<textarea class="form-i" rows="4" id="fb-txt" placeholder="What&#39;s working? What&#39;s missing? What would make this a must-have for your business?"></textarea>
+<button onclick="sendFb()" class="btn btn-p" style="margin-top:10px">Send feedback</button>
+<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+<button onclick="doLogout()" style="padding:7px 14px;border:1px solid rgba(239,68,68,.3);background:var(--red-bg);color:#991b1b;border-radius:var(--radius);font-size:13px;font-weight:500;cursor:pointer">Sign out</button>
+</div>
+</div>
+</div>
+</div>
+</div></div></div>
+<script>
+// ═══════════════════════════════════════════════════
+// GROWTHOS SERVER CONFIG
+// When running on Railway: set SERVER_URL to your Railway URL
+// When running locally: leave as empty string
+// ═══════════════════════════════════════════════════
+const SERVER_URL = 'https://growthos-server-production.up.railway.app'; 
+// ═══════════════════════════════════════════════════
+
+const HAS_KEY = true; // Server handles the key — always true
+
+// ── STATE ──
+let userName = '', userCo = '', userInd = '', obGoals = [], queryCount = 0, chatHistory = [], bizData = {};
+
+// ── UTILS ──
+function showToast(msg, dur) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur || 3200);
+}
+function copyEl(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent || el.innerText).then(() => showToast('✓ Copied!'));
+}
+function greet() {
+  const h = new Date().getHours();
+  return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+}
+function fmtAED(n) {
+  if (n >= 1000000) return 'AED ' + (n / 1000000).toFixed(1) + 'M';
+  if (n >= 1000) return 'AED ' + (n / 1000).toFixed(0) + 'K';
+  return 'AED ' + n.toLocaleString();
+}
+
+// ── AI CALL ──
+// All calls go through your Railway server — no CORS errors ever
+async function aiCall(messages, system, maxTok) {
+  try {
+    const base = SERVER_URL || window.location.origin;
+    const body = { messages: messages, max_tokens: maxTok || 1000 };
+    if (system) body.system = system;
+    const r = await fetch(base + '/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (r.ok) {
+      const d = await r.json();
+      return d.text || null;
+    }
+    const err = await r.json().catch(() => ({}));
+    console.error('AI error:', err.error || r.status);
+    return null;
+  } catch (e) {
+    console.error('Network error:', e);
+    return null;
+  }
+}
+async function quickAI(prompt, maxTok) {
+  return aiCall([{ role: 'user', content: prompt }], '', maxTok || 800);
+}
+
+// ── AUTH ──
+function doLogin() {
+  const name = document.getElementById('l-name').value.trim();
+  const co = document.getElementById('l-co').value.trim();
+  const ind = document.getElementById('l-ind').value;
+  if (!name) { showToast('Please enter your name'); return; }
+  userName = name; userCo = co || 'My Business'; userInd = ind;
+  document.getElementById('auth').style.display = 'none';
+  const key = 'gos_' + name.toLowerCase().replace(/\s/g, '');
+  if (localStorage.getItem(key)) { launchApp(); } else { localStorage.setItem(key, '1'); showOb(); }
+}
+function doLogout() {
+  userName = ''; userCo = ''; chatHistory = []; bizData = {};
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('auth').style.display = 'flex';
+  document.getElementById('l-name').value = '';
+  document.getElementById('l-co').value = '';
+}
+
+// ── ONBOARDING ──
+function showOb() { document.getElementById('onboarding').style.display = 'flex'; }
+function obGo(step) {
+  document.querySelectorAll('.ob-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('ob' + step).classList.add('active');
+  for (var i = 1; i <= 3; i++) document.getElementById('od' + i).classList.toggle('done', i <= step);
+}
+function togGoal(el) {
+  el.classList.toggle('sel');
+  const lbl = el.querySelector('.ob-opt-lbl').textContent;
+  if (el.classList.contains('sel')) { obGoals.push(lbl); } else { obGoals = obGoals.filter(function(g) { return g !== lbl; }); }
+}
+function obConnectZoho() {
+  document.getElementById('ob-zoho-tag').textContent = '✓ Connected';
+  document.getElementById('ob-zoho-btn').classList.add('connected');
+  showToast('Zoho connected! Data will sync automatically once the OAuth server is live.');
+  setTimeout(skipOb, 1200);
+}
+function obUpload() { skipOb(); setTimeout(function() { showPage('upload'); }, 300); }
+function skipOb() {
+  const rev = document.getElementById('ob-rev').value;
+  const cli = document.getElementById('ob-cli').value;
+  const chal = document.getElementById('ob-chal').value;
+  if (rev) bizData.revenue = rev;
+  if (cli) bizData.clients = cli;
+  if (chal) bizData.challenge = chal;
+  if (obGoals.length) bizData.goals = obGoals.join(', ');
+  document.getElementById('onboarding').style.display = 'none';
+  launchApp();
+}
+
+// ── LAUNCH APP ──
+function launchApp() {
+  const app = document.getElementById('app');
+  app.style.display = 'flex';
+  app.style.flexDirection = 'column';
+  const first = userName.split(' ')[0];
+  const initials = userName.split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().slice(0, 2);
+  document.getElementById('uav').textContent = initials;
+  document.getElementById('dash-greet').textContent = greet() + ', ' + first + ' 👋';
+  document.getElementById('morning-title').textContent = greet() + ', ' + first + ' ☀️';
+  document.getElementById('morning-date').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  document.getElementById('s-name').value = userName;
+  document.getElementById('s-co').value = userCo;
+  const wm = document.getElementById('welcome-msg');
+  if (wm) wm.innerHTML = 'Hello ' + first + '! I\'m your GrowthOS AI Business Advisor, powered by Claude.<br><br>Paste your business details in the context box above and ask me anything — revenue, leads, pricing, cash flow, clients, or what to focus on today.';
+  if (Object.keys(bizData).length > 0) {
+    const ctx = document.getElementById('biz-ctx');
+    if (ctx && !ctx.value.trim()) {
+      let t = 'Business: ' + userCo + ' — ' + userInd + ', Dubai UAE\n';
+      if (bizData.revenue) t += 'Monthly revenue: ' + bizData.revenue + '\n';
+      if (bizData.clients) t += 'Active clients: ' + bizData.clients + '\n';
+      if (bizData.challenge) t += 'Biggest challenge: ' + bizData.challenge + '\n';
+      if (bizData.goals) t += 'Goals: ' + bizData.goals + '\n';
+      ctx.value = t;
+    }
+  }
+  updateQC();
+  // API key is managed server-side
+}
+
+// ── NAVIGATION ──
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('on'); });
+  const pg = document.getElementById('page-' + name);
+  if (pg) pg.classList.add('on');
+  document.querySelectorAll('.ni').forEach(function(n) { n.classList.remove('on'); });
+  if (el) el.classList.add('on');
+  document.getElementById('main').scrollTop = 0;
+}
+
+// ── AI ADVISOR CHAT ──
+function useSug(el) {
+  document.getElementById('chat-input').value = el.textContent;
+  sendMsg();
+}
+function saveCtx() {
+  const el = document.getElementById('ctx-saved');
+  el.style.display = 'inline';
+  setTimeout(function() { el.style.display = 'none'; }, 2000);
+  showToast('Context saved — AI will use this in all replies');
+}
+function updateQC() {
+  const el = document.getElementById('qcount');
+  if (el) el.textContent = queryCount;
+}
+async function sendMsg() {
+  const inp = document.getElementById('chat-input');
+  const msg = inp.value.trim();
+  if (!msg) return;
+  const msgs = document.getElementById('chat-msgs');
+  const btn = document.getElementById('send-btn');
+  inp.value = ''; inp.disabled = true; btn.disabled = true;
+  addBub('u', msg, msgs);
+  chatHistory.push({ role: 'user', content: msg });
+  const typEl = addTyping(msgs);
+  const ctx = document.getElementById('biz-ctx').value;
+  const sys = 'You are GrowthOS AI Business Advisor — a sharp, practical executive assistant for SME business owners in Dubai UAE.\n\nBUSINESS CONTEXT:\n' + (ctx || 'No context provided — give helpful general advice and ask them to add their business context.') + '\n\nUSER: ' + userName + ' | COMPANY: ' + userCo + ' | INDUSTRY: ' + userInd + '\n\nRULES:\n- Answer the specific question asked\n- Reference actual numbers from context when available\n- Give 1-3 concrete prioritised actions\n- Be direct and decisive — under 300 words\n- Use AED for currency\n- If no context is provided, give helpful general advice';
+  const reply = await aiCall(chatHistory.slice(-16), sys, 1024);
+  typEl.remove();
+  if (reply) {
+    addBub('ai', reply, msgs);
+    chatHistory.push({ role: 'assistant', content: reply });
+    queryCount++;
+    updateQC();
+  } else {
+    addBub('err', 'Could not reach the AI server. Make sure your Railway server is running and the API key is set in Railway environment variables.', msgs);
+    chatHistory.pop();
+  }
+  inp.disabled = false; btn.disabled = false; inp.focus();
+}
+function getDemoReply(msg) {
+  const m = msg.toLowerCase();
+  if (m.indexOf('focus') > -1 || m.indexOf('week') > -1 || m.indexOf('today') > -1)
+    return 'To get personalised daily priorities, add your API key to the GrowthOS file.\n\nIn general, the highest-impact activities for most service businesses are:\n1. Follow up with uncontacted leads — they go cold fast\n2. Chase overdue invoices — cash flow is everything\n3. Deliver outstanding work for your best-paying clients first\n\nAdd your context and I can give you advice specific to your exact situation.';
+  if (m.indexOf('revenue') > -1 || m.indexOf('money') > -1 || m.indexOf('profit') > -1)
+    return 'Add your API key and business context to get specific revenue analysis.\n\nGeneral principle: most service businesses leave money on the table by undercharging. Check your rates against the UAE market using the Pricing Advisor in the Finance section.';
+  return 'I\'m ready to help with ' + userCo + '!\n\nTo get specific, data-backed advice:\n1. Add your Anthropic API key to the GrowthOS HTML file\n2. Fill in your business context in the box above\n\nOnce set up, I can answer anything about your revenue, leads, clients, pricing, or strategy.';
+}
+function addBub(type, text, container) {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg' + (type === 'u' ? ' u' : '');
+  const avL = type === 'u' ? (userName[0] || 'U').toUpperCase() : 'G';
+  const avC = type === 'u' ? 'u' : 'ai';
+  const bC = type === 'err' ? 'err' : (type === 'u' ? 'u' : 'ai');
+  wrap.innerHTML = '<div class="mav ' + avC + '">' + avL + '</div><div class="bub ' + bC + '" style="white-space:pre-line">' + text + '</div>';
+  container.appendChild(wrap);
+  container.scrollTop = container.scrollHeight;
+  return wrap;
+}
+function addTyping(container) {
+  const el = document.createElement('div');
+  el.className = 'msg';
+  el.innerHTML = '<div class="mav ai">G</div><div class="bub ai"><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>';
+  container.appendChild(el);
+  container.scrollTop = container.scrollHeight;
+  return el;
+}
+
+// ── MORNING BRIEF ──
+async function genMorning() {
+  const out = document.getElementById('morning-out');
+  const ctx = document.getElementById('biz-ctx').value;
+  if (!ctx.trim()) {
+    out.innerHTML = '<div class="notice amber">Add your business context in the AI Advisor section first — then your morning brief will be personalised to your actual business.</div>';
+    return;
+  }
+  out.innerHTML = '<div class="notice info">Generating your personalised morning brief…</div>';
+  const first = userName.split(' ')[0];
+  const result = await quickAI('Generate a concise morning business briefing for ' + first + ' at ' + userCo + '.\n\nContext:\n' + ctx + '\n\nFormat:\n🎯 ONE FOCUS: (single most important task today with specific reason)\n📅 TODAY: (2-3 time-sensitive items)\n⚠️ ATTENTION: (1-2 risks or problems)\n💡 OPPORTUNITY: (one specific action)\n📊 PULSE: (3 key numbers)\n\nBe specific with real numbers from context. Under 200 words.', 500);
+  if (result) {
+    out.innerHTML = '<div class="card" style="white-space:pre-line;font-size:13px;line-height:1.8">' + result + '</div>';
+    const focusMatch = result.match(/ONE FOCUS[:\s]+(.+)/i);
+    if (focusMatch) {
+      document.getElementById('mf-title').textContent = focusMatch[1].trim();
+      document.getElementById('mf-sub').textContent = 'Generated from your business context just now.';
+    }
+  } else {
+    out.innerHTML = '<div class="notice warn">Could not generate brief — please check your API key is set correctly in the file.</div>';
+  }
+}
+
+// ── FILE UPLOAD ──
+function dropFile(e, section) {
+  e.preventDefault();
+  const dropEl = section === 'general' ? 'main-drop' : section + '-drop';
+  const d = document.getElementById(dropEl);
+  if (d) d.classList.remove('drag');
+  Array.from(e.dataTransfer.files).forEach(function(f) { processFile(f, section); });
+}
+function fileInput(e, section) {
+  Array.from(e.target.files).forEach(function(f) { processFile(f, section); });
+}
+async function processFile(file, section) {
+  const statusMap = { performance: 'perf-out', finance: 'fin-status', leads: 'leads-status', general: 'upload-list' };
+  const outId = statusMap[section] || 'upload-list';
+  const outEl = document.getElementById(outId);
+  const item = document.createElement('div');
+  item.style.cssText = 'background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:8px';
+  item.innerHTML = '<div style="font-size:20px">📊</div><div style="flex:1"><div style="font-size:13px;font-weight:600">' + file.name + '</div><div style="font-size:11px;color:var(--text3);margin-top:2px">' + (file.size / 1024).toFixed(0) + ' KB · Analysing…</div></div><div class="aipulse"></div>';
+  outEl.prepend(item);
+  const text = await readFile(file);
+  const ctx = document.getElementById('biz-ctx').value;
+  const prompt = 'Analyse this business data file: ' + file.name + '\n\nFile contents:\n' + text.substring(0, 3000) + '\n\nBusiness: ' + userCo + ' — ' + userInd + (ctx ? '\n' + ctx : '') + '\n\nProvide:\n1. Summary of what this data shows (2 sentences)\n2. Top 3 specific insights with numbers\n3. Top 3 actionable recommendations\n4. Any urgent issues needing immediate attention\n\nBe specific and reference actual numbers. Under 250 words.';
+  const result = await quickAI(prompt, 600);
+  item.innerHTML = '<div style="font-size:20px">📊</div><div style="flex:1"><div style="font-size:13px;font-weight:600">' + file.name + '</div><div style="font-size:11px;color:var(--green);margin-top:2px">✓ Analysis complete</div></div><span class="tag t-g">Done</span>';
+  const aiOut = result || 'File uploaded. Add your API key to get AI analysis of this data.';
+  if (section === 'performance') {
+    outEl.innerHTML = '<div class="card" style="white-space:pre-line;font-size:13px;line-height:1.8"><strong>📊 AI Analysis — ' + file.name + '</strong>\n\n' + aiOut + '</div>';
+  } else if (section === 'finance') {
+    const aiEl = document.getElementById('fin-ai');
+    if (aiEl) aiEl.innerHTML = '<div style="white-space:pre-line;font-size:13px;line-height:1.8">' + aiOut + '</div>';
+    parseFinance(text);
+  } else if (section === 'leads') {
+    const aiEl = document.getElementById('leads-ai');
+    if (aiEl) aiEl.innerHTML = '<div style="white-space:pre-line;font-size:13px;line-height:1.8">' + aiOut + '</div>';
+    parseLeads(text);
+  } else {
+    if (result) {
+      const d2 = document.createElement('div');
+      d2.style.cssText = 'background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:8px;white-space:pre-line;font-size:13px;line-height:1.8';
+      d2.innerHTML = '<strong>' + file.name + ' — AI Analysis</strong>\n\n' + result;
+      outEl.appendChild(d2);
+    }
+    showToast('✓ ' + file.name + ' analysed — ask the AI Advisor questions about it');
+  }
+}
+function readFile(file) {
+  return new Promise(function(resolve) {
+    if (file.type === 'application/pdf') { resolve('[PDF: ' + file.name + ']'); return; }
+    const r = new FileReader();
+    r.onload = function(e) { resolve(e.target.result || ''); };
+    r.onerror = function() { resolve(''); };
+    r.readAsText(file);
+  });
+}
+function parseFinance(text) {
+  const lines = text.split('\n');
+  let rev = 0, exp = 0, ov = 0, ovc = 0;
+  lines.forEach(function(line) {
+    const low = line.toLowerCase();
+    const nums = line.match(/\d{4,}/g);
+    if (!nums) return;
+    nums.forEach(function(n) {
+      const v = parseInt(n);
+      if (v > 100 && v < 10000000) {
+        if (low.indexOf('overdue') > -1) { ov += v; ovc++; }
+        else if (low.indexOf('expense') > -1 || low.indexOf('salary') > -1 || low.indexOf('cost') > -1) exp += v;
+        else if (low.indexOf('revenue') > -1 || low.indexOf('paid') > -1 || low.indexOf('invoice') > -1) rev += v;
+      }
+    });
+  });
+  if (rev > 0) { document.getElementById('f-rev').textContent = fmtAED(rev); document.getElementById('f-rev-d').textContent = 'From uploaded data'; document.getElementById('f-rev-d').className = 'delta up'; }
+  if (exp > 0) { document.getElementById('f-exp').textContent = fmtAED(exp); document.getElementById('f-exp-d').textContent = 'From uploaded data'; }
+  if (rev > 0 && exp > 0) { const p = rev - exp; document.getElementById('f-profit').textContent = fmtAED(p); document.getElementById('f-profit-d').textContent = ((p / rev) * 100).toFixed(1) + '% margin'; document.getElementById('f-profit-d').className = p > 0 ? 'delta up' : 'delta dn'; }
+  if (ov > 0) { document.getElementById('f-overdue').textContent = fmtAED(ov); document.getElementById('f-overdue-d').textContent = ovc + ' invoices'; document.getElementById('f-overdue-d').className = 'delta dn'; }
+}
+function parseLeads(text) {
+  const lines = text.split('\n').filter(function(l) { return l.trim(); });
+  let tot = 0, unc = 0, won = 0, val = 0;
+  lines.slice(1).forEach(function(line) {
+    tot++;
+    const low = line.toLowerCase();
+    if (low.indexOf('uncontacted') > -1) unc++;
+    if (low.indexOf('closed won') > -1 || low.indexOf('paid') > -1) won++;
+    const nums = line.match(/\d{4,}/g);
+    if (nums) nums.forEach(function(n) { const v = parseInt(n); if (v > 1000 && v < 1000000) val += v; });
+  });
+  if (tot > 1) {
+    document.getElementById('l-tot').textContent = tot;
+    document.getElementById('l-tot-d').textContent = 'From uploaded data';
+    document.getElementById('l-tot-d').className = 'delta up';
+    if (unc > 0) { document.getElementById('l-unc').textContent = unc; document.getElementById('l-unc-d').textContent = 'Need follow-up'; document.getElementById('l-unc-d').className = 'delta dn'; }
+    if (won > 0 && tot > 1) { document.getElementById('l-conv').textContent = ((won / (tot - 1)) * 100).toFixed(1) + '%'; document.getElementById('l-conv-d').textContent = won + ' closed'; document.getElementById('l-conv-d').className = 'delta up'; }
+    if (val > 0) { document.getElementById('l-pipe').textContent = fmtAED(val); document.getElementById('l-pipe-d').textContent = 'Pipeline value'; }
+    const badge = document.getElementById('leads-badge');
+    if (badge && unc > 0) badge.textContent = unc;
+  }
+}
+
+// ── PRICING ADVISOR ──
+async function getPricing() {
+  const svc = document.getElementById('pa-svc').value.trim();
+  if (!svc) { showToast('Please describe your service first'); return; }
+  const cli = document.getElementById('pa-cli').value;
+  const curr = document.getElementById('pa-curr').value.trim();
+  const out = document.getElementById('pa-out');
+  out.textContent = 'Analysing UAE market rates…';
+  const result = await quickAI('Pricing advisor for Dubai UAE.\n\nService: ' + svc + '\nClient type: ' + cli + '\nCurrently charging: ' + (curr || 'not specified') + '\n\nProvide:\n1. Market rate range in UAE (in AED)\n2. Whether they are undercharging or overcharging\n3. Recommended price with reasoning\n4. One sentence to justify this price to the client\n\nBe specific with AED amounts. Under 150 words.', 400);
+  out.textContent = result || 'Add your API key to get real UAE market rate analysis. General guideline: most Dubai agencies undercharge by 20-40% compared to market rate.';
+}
+
+// ── COMPETITOR WATCH ──
+async function analyseComp() {
+  const name = document.getElementById('c-name').value.trim();
+  if (!name) { showToast('Please enter a competitor name'); return; }
+  const url = document.getElementById('c-url').value.trim();
+  const notes = document.getElementById('c-notes').value.trim();
+  const market = document.getElementById('c-market').value.trim();
+  const out = document.getElementById('comp-out');
+  const status = document.getElementById('comp-status');
+  status.textContent = 'Analysing…'; status.className = 'tag t-a';
+  out.textContent = 'Analysing ' + name + '…';
+  const ctx = document.getElementById('biz-ctx').value;
+  const result = await quickAI('Competitive intelligence analyst for Dubai UAE.\n\nOUR BUSINESS: ' + userCo + ' — ' + userInd + '\n' + (ctx || '') + '\n\nCOMPETITOR:\nName: ' + name + '\nWebsite: ' + (url || 'not provided') + '\nWhat we know: ' + (notes || 'nothing specific') + '\nMarket: ' + (market || 'Dubai UAE') + '\n\nProvide:\n1. Competitor positioning (2-3 sentences)\n2. Their likely strengths (2-3 points)\n3. Weaknesses we can exploit (2-3 points)\n4. Counter-strategy for us (2-3 actionable points)\n5. One key opportunity this creates\n\nUnder 250 words.', 600);
+  if (result) {
+    out.innerHTML = '<div style="white-space:pre-line;font-size:13px;line-height:1.8">' + result + '</div>';
+    status.textContent = '✓ Ready'; status.className = 'tag t-g';
+    const hist = document.getElementById('comp-history');
+    const card = document.createElement('div');
+    card.className = 'comp-card';
+    card.innerHTML = '<div class="comp-hd"><div class="comp-av">' + name.slice(0, 2).toUpperCase() + '</div><div style="flex:1"><div style="font-size:13px;font-weight:600">' + name + '</div><div style="font-size:10px;color:var(--text3)">' + (url || 'No URL') + '</div></div><span class="tag t-r">Monitored</span></div><div style="font-size:12px;color:var(--text2);line-height:1.6;margin-top:4px">' + result.substring(0, 180) + '…</div>';
+    hist.prepend(card);
+    document.getElementById('c-name').value = ''; document.getElementById('c-url').value = ''; document.getElementById('c-notes').value = '';
+  } else {
+    out.textContent = 'Add your API key to get AI competitor analysis.';
+    status.textContent = 'No API key'; status.className = 'tag t-a';
+  }
+}
+
+// ── CONTENT STUDIO ──
+function ctab(el, idx) {
+  el.closest('.page').querySelectorAll('.tab').forEach(function(t, i) {
+    t.classList.toggle('on', i === idx);
+    const p = document.getElementById('ct' + i);
+    if (p) p.style.display = i === idx ? 'block' : 'none';
+  });
+}
+async function genIdeas() {
+  const topic = document.getElementById('ci-topic').value.trim();
+  if (!topic) { showToast('Please describe what you want content about'); return; }
+  const plat = document.getElementById('ci-plat').value;
+  const goal = document.getElementById('ci-goal').value;
+  const out = document.getElementById('ideas-out');
+  const camp = document.getElementById('campaigns-out');
+  out.innerHTML = '<div class="notice info">Generating content ideas…</div>';
+  camp.textContent = 'Generating…';
+  const ctx = document.getElementById('biz-ctx').value;
+  const result = await quickAI('Content ideas for a business in Dubai UAE.\n\nBusiness: ' + userCo + ' — ' + userInd + '\n' + (ctx || '') + '\nTopic: ' + topic + '\nPlatform: ' + plat + '\nGoal: ' + goal + '\n\nProvide:\n1. Five specific content ideas — for each: concept (1 sentence), hook (opening line under 15 words), why it will perform\n2. Two recommended campaign ideas with expected results\n\nNumbered lists. Under 400 words.', 800);
+  if (result) {
+    out.innerHTML = '<div class="card"><div style="white-space:pre-line;font-size:13px;line-height:1.8">' + result + '</div></div>';
+    camp.innerHTML = '<div style="white-space:pre-line;font-size:13px;line-height:1.8">' + result + '</div>';
+  } else {
+    out.innerHTML = '<div class="notice warn">Add your API key to generate AI content ideas for your business.</div>';
+    camp.textContent = 'API key required.';
+  }
+}
+async function genScript() {
+  const topic = document.getElementById('sc-topic').value.trim();
+  if (!topic) { showToast('Please describe what the content is about'); return; }
+  const type = document.getElementById('sc-type').value;
+  const tone = document.getElementById('sc-tone').value;
+  const cta = document.getElementById('sc-cta').value;
+  const out = document.getElementById('sc-out');
+  const status = document.getElementById('sc-status');
+  status.textContent = 'Writing…'; status.className = 'tag t-a';
+  out.textContent = 'Writing your script…';
+  const ctx = document.getElementById('biz-ctx').value;
+  const result = await quickAI('Write a ' + type + ' for ' + (userCo || 'a Dubai business') + ' about: "' + topic + '"\n\nTone: ' + tone + '\nCall to action: ' + cta + '\nAudience: UAE business owners\nContext: ' + (ctx || userInd) + '\n\nMake it specific, engaging, ready to post. Label sections. Under 300 words.', 700);
+  out.textContent = result || 'Add your API key to generate a real script tailored to your business.';
+  status.textContent = result ? '✓ Ready' : 'No API key';
+  status.className = result ? 'tag t-g' : 'tag t-a';
+}
+
+// ── SALES BOT ──
+function activateBot() {
+  const biz = document.getElementById('bot-biz').value;
+  const svcs = document.getElementById('bot-svcs').value;
+  const price = document.getElementById('bot-price').value;
+  if (!biz) { showToast('Please enter your business name'); return; }
+  document.getElementById('bot-status').textContent = '✓ Active'; document.getElementById('bot-status').className = 'tag t-g';
+  document.getElementById('bot-coname').textContent = biz;
+  document.getElementById('bot-welcome').innerHTML = 'Hi! I\'m the virtual assistant for <strong style="color:#a5b4fc">' + biz + '</strong>. ' + (svcs ? 'We offer ' + svcs.split(',')[0] + ' and more. ' : '') + 'I can answer your questions and help you book a discovery call. What can I help you with today?';
+  const embed = '<!-- GrowthOS Sales Bot for ' + biz + ' -->\n<script src="https://growthos.app/bot.js" data-biz="' + biz.replace(/"/g, '') + '" data-key="' + API_KEY.slice(0, 8) + '..."><\/script>';
+  document.getElementById('embed-code').textContent = embed;
+  showToast('✓ Sales Bot activated! Copy the embed code and add it to your website.');
+}
+async function testBot() {
+  const inp = document.getElementById('bot-inp');
+  const msg = inp.value.trim();
+  if (!msg) return;
+  inp.value = '';
+  const cont = document.getElementById('bot-msgs');
+  const uEl = document.createElement('div');
+  uEl.className = 'bot-msg-u'; uEl.innerHTML = '<span>' + msg + '</span>';
+  cont.appendChild(uEl);
+  const biz = document.getElementById('bot-biz').value || userCo;
+  const svcs = document.getElementById('bot-svcs').value || 'our services';
+  const price = document.getElementById('bot-price').value || 'contact for quote';
+  const tone = document.getElementById('bot-tone').value;
+  const sys = 'You are a sales assistant for ' + biz + '. Services: ' + svcs + '. Pricing: ' + price + '. Tone: ' + tone + '. Be helpful, qualify leads, offer to book calls. Keep replies under 80 words.';
+  const result = await aiCall([{ role: 'user', content: msg }], sys, 150);
+  const reply = result || getBotFallback(msg);
+  const aiEl = document.createElement('div');
+  aiEl.className = 'bot-msg-ai'; aiEl.textContent = reply;
+  cont.appendChild(aiEl);
+  cont.scrollTop = cont.scrollHeight;
+}
+function getBotFallback(msg) {
+  const m = msg.toLowerCase();
+  if (m.indexOf('service') > -1 || m.indexOf('offer') > -1) return 'We offer brand strategy, social media management, and content creation. Which area are you most interested in?';
+  if (m.indexOf('price') > -1 || m.indexOf('cost') > -1) return 'Our projects start from AED 10,000. Could you share more about what you need so I can give you an accurate quote?';
+  if (m.indexOf('call') > -1 || m.indexOf('meet') > -1 || m.indexOf('book') > -1) return 'I would love to set up a discovery call! Could you share your name and the best time to reach you?';
+  return 'Great question! Our team would love to help. Can I get your contact details to follow up personally, or would you like to book a discovery call?';
+}
+
+// ── CONNECT DATA ──
+function connectZoho(product) {
+  const names = { crm: 'Zoho CRM', books: 'Zoho Books', social: 'Zoho Social' };
+  showToast('Opening ' + (names[product] || 'Zoho') + ' authentication…');
+  setTimeout(function() { showToast('Zoho OAuth launches with the full server version. Use Upload Data in the meantime.'); }, 2000);
+}
+function suggestTool() {
+  const tool = document.getElementById('suggest-inp').value.trim();
+  if (!tool) return;
+  showToast('Thanks! We will consider ' + tool + ' for our next integration.');
+  document.getElementById('suggest-inp').value = '';
+}
+
+// ── SETTINGS ──
+function saveSets() {
+  userName = document.getElementById('s-name').value || userName;
+  userCo = document.getElementById('s-co').value || userCo;
+  showToast('✓ Settings saved');
+}
+function sendFb() {
+  const txt = document.getElementById('fb-txt').value.trim();
+  if (!txt) { showToast('Please write your feedback first'); return; }
+  showToast('✓ Thank you! Your feedback helps shape GrowthOS 🙏');
+  document.getElementById('fb-txt').value = '';
+}
+</script>
+</body>
+</html>
