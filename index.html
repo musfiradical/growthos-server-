@@ -329,7 +329,7 @@ select.form-i{cursor:pointer}
 <div class="ni" onclick="showPage('performance',this)">📊 Performance Tracker</div>
 <div class="ni" onclick="showPage('salesbot',this)">🤖 AI Sales Bot</div>
 <div class="nlbl">Data</div>
-<div class="ni" onclick="showPage('upload',this)">⬆️ Upload Data</div>
+<div class="ni" onclick="showPage('upload',this)">⬆️ Data Hub</div>
 <div class="ni" onclick="showPage('connect',this)">🔗 Connect Data</div>
 <div class="nlbl">Account</div>
 <div class="ni" onclick="showPage('pricing',this)">💳 Plans &amp; Billing</div>
@@ -619,49 +619,174 @@ Competitors: BrandMasters MENA just dropped pricing 15%"></textarea>
 </div>
 </div>
 <div class="page" id="page-upload">
-<div class="ptitle">⬆️ Upload Data</div>
-<div class="psub">Upload your business files — AI analyses them and updates your dashboard automatically</div>
-<div class="drop" id="main-drop" onclick="document.getElementById('main-file').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="dropFile(event,'general')" style="margin-bottom:20px">
-<div style="font-size:36px;margin-bottom:10px">⬆️</div>
-<div style="font-size:14px;font-weight:600;margin-bottom:5px">Drop any business file here</div>
-<div style="font-size:12px;color:var(--text2)">CSV, Excel, or PDF — AI will read and analyse it instantly</div>
-<div class="ftags"><span class="ftag">📊 Sales</span><span class="ftag">🎯 Leads</span><span class="ftag">💸 Expenses</span><span class="ftag">📱 Analytics</span><span class="ftag">💬 Feedback</span></div>
-<input type="file" id="main-file" multiple accept=".csv,.xlsx,.xls,.pdf,.txt" style="display:none" onchange="fileInput(event,'general')">
+<div class="ptitle">⬆️ Data Hub</div>
+<div class="psub">Upload any business file once — AI reads and syncs it across your entire dashboard automatically</div>
+
+<div class="notice good" style="margin-bottom:20px" id="data-summary-bar" style="display:none">
+  ✓ <span id="data-summary-text">No data uploaded yet</span>
 </div>
-<div id="upload-list" style="display:flex;flex-direction:column;gap:8px"></div>
-<div class="card" style="margin-top:16px">
-<div class="ctitle" style="margin-bottom:12px">What can you upload?</div>
-<div class="g3">
-<div style="font-size:12px"><div style="font-weight:600;margin-bottom:4px">📊 Sales Report</div><div style="color:var(--text2);line-height:1.55">Monthly revenue, invoices, payment status. AI shows revenue trends and who owes you money.</div></div>
-<div style="font-size:12px"><div style="font-weight:600;margin-bottom:4px">🎯 Leads Report</div><div style="color:var(--text2);line-height:1.55">Lead sources and response times. AI identifies best channels and who to follow up with.</div></div>
-<div style="font-size:12px"><div style="font-weight:600;margin-bottom:4px">💸 Expenses CSV</div><div style="color:var(--text2);line-height:1.55">Bank statement or expense report. AI categorises spending and finds where to cut costs.</div></div>
-<div style="font-size:12px"><div style="font-weight:600;margin-bottom:4px">📱 Social Analytics</div><div style="color:var(--text2);line-height:1.55">Instagram or LinkedIn export. AI tells you best content types and posting times.</div></div>
-<div style="font-size:12px"><div style="font-weight:600;margin-bottom:4px">💬 Feedback Data</div><div style="color:var(--text2);line-height:1.55">Survey responses or reviews. AI surfaces your top praise and complaints.</div></div>
-<div style="font-size:12px"><div style="font-weight:600;margin-bottom:4px">📄 Any report</div><div style="color:var(--text2);line-height:1.55">Any business document. Then ask the AI Advisor questions about it.</div></div>
+
+<!-- DRAG AND DROP ZONE -->
+<div class="drop" id="main-drop"
+  onclick="document.getElementById('main-file').click()"
+  ondragover="event.preventDefault();this.classList.add('drag')"
+  ondragleave="this.classList.remove('drag')"
+  ondrop="dropFiles(event)"
+  style="margin-bottom:20px">
+  <div style="font-size:40px;margin-bottom:12px">⬆️</div>
+  <div style="font-size:15px;font-weight:600;margin-bottom:6px">Drop any business file here</div>
+  <div style="font-size:13px;color:var(--text2);margin-bottom:12px">CSV, Excel, PDF, Word, or plain text — AI reads and analyses everything</div>
+  <div class="ftags">
+    <span class="ftag">📊 Sales Report</span>
+    <span class="ftag">🎯 Leads</span>
+    <span class="ftag">💸 Expenses</span>
+    <span class="ftag">📱 Analytics</span>
+    <span class="ftag">💬 Feedback</span>
+    <span class="ftag">📄 Any document</span>
+  </div>
+  <input type="file" id="main-file" multiple accept=".csv,.xlsx,.xls,.pdf,.txt,.doc,.docx" style="display:none" onchange="uploadFiles(event)">
+</div>
+
+<!-- UPLOADED FILES LIST -->
+<div id="uploaded-files-list" style="margin-bottom:20px"></div>
+
+<!-- GLOBAL AI ANALYSIS -->
+<div id="global-ai-out" style="margin-bottom:20px"></div>
+
+<!-- WHAT YOU CAN UPLOAD -->
+<div class="card">
+  <div class="ctitle" style="margin-bottom:14px">What can you upload?</div>
+  <div class="g3">
+    <div style="font-size:12px"><div style="font-weight:600;margin-bottom:4px">📊 Sales / Revenue</div><div style="color:var(--text2);line-height:1.55">Monthly sales, invoices, payment status. Updates Finance page automatically.</div></div>
+    <div style="font-size:12px"><div style="font-weight:600;margin-bottom:4px">🎯 Leads / CRM</div><div style="color:var(--text2);line-height:1.55">Lead sources, pipeline, response times. Updates Lead Intelligence automatically.</div></div>
+    <div style="font-size:12px"><div style="font-weight:600;margin-bottom:4px">💸 Expenses</div><div style="color:var(--text2);line-height:1.55">Bank statements or expense reports. AI categorises and finds where to cut costs.</div></div>
+    <div style="font-size:12px"><div style="font-weight:600;margin-bottom:4px">📱 Social Analytics</div><div style="color:var(--text2);line-height:1.55">Instagram, LinkedIn, or TikTok exports. Updates Performance Tracker automatically.</div></div>
+    <div style="font-size:12px"><div style="font-weight:600;margin-bottom:4px">💬 Customer Feedback</div><div style="color:var(--text2);line-height:1.55">Survey results or reviews. AI analyses sentiment and surfaces top complaints.</div></div>
+    <div style="font-size:12px"><div style="font-weight:600;margin-bottom:4px">📄 Any document</div><div style="color:var(--text2);line-height:1.55">Reports, proposals, meeting notes. Ask the AI Advisor questions about it after.</div></div>
+  </div>
 </div>
 </div>
-</div>
+
 <div class="page" id="page-connect">
 <div class="ptitle">🔗 Connect Data</div>
-<div class="psub">Connect your business tools for automatic sync — no manual uploads ever again</div>
-<div class="notice good" style="margin-bottom:20px">✓ Connected tools update your dashboard automatically every hour. Your data stays private and is never shared.</div>
-<div class="int-grid" style="margin-bottom:20px">
-<div class="int-card"><div class="int-logo" style="background:#E42527">Z</div><div class="int-name">Zoho CRM</div><div class="int-desc">Leads, clients, pipeline, deals</div><button class="int-btn live" onclick="connectZoho('crm')">Connect Zoho CRM</button></div>
-<div class="int-card"><div class="int-logo" style="background:#E42527">Z</div><div class="int-name">Zoho Books</div><div class="int-desc">Revenue, invoices, expenses</div><button class="int-btn live" onclick="connectZoho('books')">Connect Zoho Books</button></div>
-<div class="int-card"><div class="int-logo" style="background:#E42527">Z</div><div class="int-name">Zoho Social</div><div class="int-desc">Instagram, LinkedIn analytics</div><button class="int-btn live" onclick="connectZoho('social')">Connect Zoho Social</button></div>
-<div class="int-card"><div class="int-logo" style="background:#13b5ea">X</div><div class="int-name">Xero</div><div class="int-desc">Finance and invoicing</div><button class="int-btn coming">Coming soon</button></div>
-<div class="int-card"><div class="int-logo" style="background:#ff7a59">H</div><div class="int-name">HubSpot</div><div class="int-desc">CRM and leads</div><button class="int-btn coming">Coming soon</button></div>
-<div class="int-card"><div class="int-logo" style="background:#0f9d58">G</div><div class="int-name">Google Sheets</div><div class="int-desc">Custom data from spreadsheets</div><button class="int-btn coming">Coming soon</button></div>
-<div class="int-card"><div class="int-logo" style="background:#e37400">GA</div><div class="int-name">Google Analytics</div><div class="int-desc">Website traffic and conversions</div><button class="int-btn coming">Coming soon</button></div>
-<div class="int-card"><div class="int-logo" style="background:#1877f2">M</div><div class="int-name">Meta Ads</div><div class="int-desc">Ad spend, leads, ROAS</div><button class="int-btn coming">Coming soon</button></div>
-<div class="int-card"><div class="int-logo" style="background:#96bf48">S</div><div class="int-name">Shopify</div><div class="int-desc">Orders, revenue, products</div><button class="int-btn coming">Coming soon</button></div>
+<div class="psub">Connect your tools once — data syncs automatically every hour, no manual uploads ever again</div>
+
+<!-- CONNECTION STATUS BAR -->
+<div id="conn-status-bar" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px" id="conn-bar"></div>
+
+<!-- GSUITE -->
+<div class="card" style="margin-bottom:14px">
+  <div class="chd" style="margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:36px;height:36px;background:linear-gradient(135deg,#4285f4,#34a853);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px">G</div>
+      <div><div class="ctitle">Google Workspace</div><div style="font-size:11px;color:var(--text3);margin-top:2px">Gmail · Drive · Sheets · Calendar</div></div>
+    </div>
+    <span class="tag t-g" id="gsuite-status">Not connected</span>
+  </div>
+  <div style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.65">Connect your Google account and GrowthOS will automatically read your emails for lead enquiries, sync your Google Sheets data, pull calendar meetings, and access Drive documents.</div>
+  <div class="g2" style="margin-bottom:14px">
+    <div style="padding:12px;background:var(--bg2);border-radius:var(--radius-lg);font-size:12px">
+      <div style="font-weight:600;margin-bottom:6px">📧 Gmail</div>
+      <div style="color:var(--text2);line-height:1.55">AI reads your inbox and flags lead enquiries, client complaints, and overdue payment replies.</div>
+    </div>
+    <div style="padding:12px;background:var(--bg2);border-radius:var(--radius-lg);font-size:12px">
+      <div style="font-weight:600;margin-bottom:6px">📊 Google Sheets</div>
+      <div style="color:var(--text2);line-height:1.55">Paste your Sheet URL and GrowthOS reads it live. No CSV downloads ever again.</div>
+    </div>
+    <div style="padding:12px;background:var(--bg2);border-radius:var(--radius-lg);font-size:12px">
+      <div style="font-weight:600;margin-bottom:6px">📁 Google Drive</div>
+      <div style="color:var(--text2);line-height:1.55">GrowthOS can read reports and documents from your Drive and include them in AI analysis.</div>
+    </div>
+    <div style="padding:12px;background:var(--bg2);border-radius:var(--radius-lg);font-size:12px">
+      <div style="font-weight:600;margin-bottom:6px">📅 Google Calendar</div>
+      <div style="color:var(--text2);line-height:1.55">Pulls your meetings into Morning Briefing so you always know what is coming up today.</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <button onclick="connectGoogle()" style="padding:10px 20px;background:#4285f4;color:#fff;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer">🔗 Connect Google Account</button>
+    <span style="font-size:11px;color:var(--text3)">One click · Read-only access · Disconnect anytime</span>
+  </div>
+  <!-- Google Sheets direct URL -->
+  <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+    <div style="font-size:12px;font-weight:600;margin-bottom:8px">📊 Or connect a Google Sheet directly (no login needed for public sheets)</div>
+    <div style="display:flex;gap:8px">
+      <input type="text" class="fi" id="sheets-url" placeholder="Paste your Google Sheets URL here…" style="flex:1;font-size:12px">
+      <button onclick="connectSheet()" style="padding:9px 16px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">Connect Sheet</button>
+    </div>
+    <div id="sheets-status" style="margin-top:8px;font-size:12px"></div>
+  </div>
 </div>
+
+<!-- MICROSOFT -->
+<div class="card" style="margin-bottom:14px">
+  <div class="chd" style="margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:36px;height:36px;background:linear-gradient(135deg,#0078d4,#00b4f0);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px">M</div>
+      <div><div class="ctitle">Microsoft 365</div><div style="font-size:11px;color:var(--text3);margin-top:2px">Outlook · Teams · OneDrive · Excel</div></div>
+    </div>
+    <span class="tag t-a" id="ms-status">Not connected</span>
+  </div>
+  <div style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.65">Connect your Microsoft account and GrowthOS will read Outlook emails, pull Teams messages, sync Excel files from OneDrive, and include them in your AI analysis automatically.</div>
+  <div class="g2" style="margin-bottom:14px">
+    <div style="padding:12px;background:var(--bg2);border-radius:var(--radius-lg);font-size:12px">
+      <div style="font-weight:600;margin-bottom:6px">📧 Outlook</div>
+      <div style="color:var(--text2);line-height:1.55">AI reads your Outlook inbox and flags important client emails, leads, and follow-ups.</div>
+    </div>
+    <div style="padding:12px;background:var(--bg2);border-radius:var(--radius-lg);font-size:12px">
+      <div style="font-weight:600;margin-bottom:6px">💬 Microsoft Teams</div>
+      <div style="color:var(--text2);line-height:1.55">GrowthOS reads team messages and flags anything that needs the business owner's attention.</div>
+    </div>
+    <div style="padding:12px;background:var(--bg2);border-radius:var(--radius-lg);font-size:12px">
+      <div style="font-weight:600;margin-bottom:6px">📁 OneDrive</div>
+      <div style="color:var(--text2);line-height:1.55">Access Excel files and documents from OneDrive directly. No manual downloading needed.</div>
+    </div>
+    <div style="padding:12px;background:var(--bg2);border-radius:var(--radius-lg);font-size:12px">
+      <div style="font-weight:600;margin-bottom:6px">📊 Excel Online</div>
+      <div style="color:var(--text2);line-height:1.55">Live sync from Excel files stored in OneDrive. Updates your dashboard automatically.</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <button onclick="connectMicrosoft()" style="padding:10px 20px;background:#0078d4;color:#fff;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer">🔗 Connect Microsoft Account</button>
+    <span style="font-size:11px;color:var(--text3)">One click · Read-only access · Disconnect anytime</span>
+  </div>
+</div>
+
+<!-- ZOHO -->
+<div class="card" style="margin-bottom:14px">
+  <div class="chd" style="margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:36px;height:36px;background:#E42527;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px">Z</div>
+      <div><div class="ctitle">Zoho</div><div style="font-size:11px;color:var(--text3);margin-top:2px">CRM · Books · Social</div></div>
+    </div>
+    <span class="tag t-r" id="zoho-status">Not connected</span>
+  </div>
+  <div style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.65">Connect Zoho and your leads, clients, revenue, invoices, and social analytics all sync automatically every hour.</div>
+  <div class="g3" style="margin-bottom:14px">
+    <div style="padding:12px;background:var(--bg2);border-radius:var(--radius-lg);font-size:12px"><div style="font-weight:600;margin-bottom:4px">Zoho CRM</div><div style="color:var(--text2)">Leads, clients, pipeline, deals</div></div>
+    <div style="padding:12px;background:var(--bg2);border-radius:var(--radius-lg);font-size:12px"><div style="font-weight:600;margin-bottom:4px">Zoho Books</div><div style="color:var(--text2)">Revenue, invoices, expenses</div></div>
+    <div style="padding:12px;background:var(--bg2);border-radius:var(--radius-lg);font-size:12px"><div style="font-weight:600;margin-bottom:4px">Zoho Social</div><div style="color:var(--text2)">Instagram, LinkedIn analytics</div></div>
+  </div>
+  <button onclick="connectZoho('all')" style="padding:10px 20px;background:#E42527;color:#fff;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer">🔗 Connect Zoho</button>
+</div>
+
+<!-- OTHER TOOLS -->
 <div class="card">
-<div class="ctitle" style="margin-bottom:8px">Don&#39;t see your tool?</div>
-<div style="font-size:13px;color:var(--text2);margin-bottom:10px;line-height:1.6">We add new integrations every month. You can always upload a CSV export from any tool in the meantime.</div>
-<div style="display:flex;gap:8px"><input type="text" class="fi" placeholder="Suggest a tool to integrate…" id="suggest-inp" style="flex:1"><button onclick="suggestTool()" class="btn btn-p btn-sm">Suggest</button></div>
+  <div class="ctitle" style="margin-bottom:14px">Other integrations</div>
+  <div class="int-grid">
+    <div class="int-card"><div class="int-logo" style="background:#13b5ea">X</div><div class="int-name">Xero</div><div class="int-desc">Finance and invoicing</div><button class="int-btn coming">Coming soon</button></div>
+    <div class="int-card"><div class="int-logo" style="background:#ff7a59">H</div><div class="int-name">HubSpot</div><div class="int-desc">CRM and leads</div><button class="int-btn coming">Coming soon</button></div>
+    <div class="int-card"><div class="int-logo" style="background:#96bf48">S</div><div class="int-name">Shopify</div><div class="int-desc">Orders and revenue</div><button class="int-btn coming">Coming soon</button></div>
+    <div class="int-card"><div class="int-logo" style="background:#e37400">GA</div><div class="int-name">Google Analytics</div><div class="int-desc">Website traffic</div><button class="int-btn coming">Coming soon</button></div>
+    <div class="int-card"><div class="int-logo" style="background:#1877f2">M</div><div class="int-name">Meta Ads</div><div class="int-desc">Ad spend and leads</div><button class="int-btn coming">Coming soon</button></div>
+    <div class="int-card"><div class="int-logo" style="background:#0077b5">LI</div><div class="int-name">LinkedIn</div><div class="int-desc">Profile and analytics</div><button class="int-btn coming">Coming soon</button></div>
+  </div>
+  <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;gap:8px">
+    <input type="text" class="fi" placeholder="Suggest a tool to integrate…" id="suggest-inp" style="flex:1;font-size:12px">
+    <button onclick="suggestTool()" style="padding:9px 16px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer">Suggest</button>
+  </div>
 </div>
 </div>
+
 <div class="page" id="page-pricing">
 <div class="ptitle">💳 Plans &amp; Billing</div>
 <div class="psub">Choose the plan that fits your business</div>
@@ -727,7 +852,7 @@ Competitors: BrandMasters MENA just dropped pricing 15%"></textarea>
 // When running on Railway: set SERVER_URL to your Railway URL
 // When running locally: leave as empty string
 // ═══════════════════════════════════════════════════
-const SERVER_URL = 'https://growthos-server-production.up.railway.app'; 
+const SERVER_URL = 'https://YOUR-APP.up.railway.app'; // Replace with your Railway URL
 // ═══════════════════════════════════════════════════
 
 const HAS_KEY = true; // Server handles the key — always true
@@ -1214,6 +1339,274 @@ function sendFb() {
   showToast('✓ Thank you! Your feedback helps shape GrowthOS 🙏');
   document.getElementById('fb-txt').value = '';
 }
+
+// ════════════════════════════════════════
+// CENTRAL DATA STORE
+// All uploaded files stored here — every page reads from this
+// ════════════════════════════════════════
+const dataStore = {
+  files: [],        // All uploaded files
+  finance: null,    // Parsed finance data
+  leads: null,      // Parsed leads data
+  performance: null,// Parsed analytics data
+  general: [],      // Other files
+  sheets: null,     // Google Sheets data
+  connections: {    // Connected services
+    google: false,
+    microsoft: false,
+    zoho: false,
+    sheet_url: ''
+  }
+};
+
+// ── FILE UPLOAD HANDLER (replaces old one) ──
+function dropFiles(e) {
+  e.preventDefault();
+  document.getElementById('main-drop').classList.remove('drag');
+  Array.from(e.dataTransfer.files).forEach(f => handleFile(f));
+}
+
+function uploadFiles(e) {
+  Array.from(e.target.files).forEach(f => handleFile(f));
+}
+
+async function handleFile(file) {
+  const list = document.getElementById('uploaded-files-list');
+
+  // Add file card immediately
+  const card = document.createElement('div');
+  card.id = 'file-' + file.name.replace(/[^a-z0-9]/gi, '_');
+  card.style.cssText = 'background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px';
+  card.innerHTML = `
+    <div style="font-size:24px">${getFileIcon(file.name)}</div>
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:600">${file.name}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px">${(file.size/1024).toFixed(0)} KB · Reading file…</div>
+    </div>
+    <div class="aipulse"></div>
+  `;
+  list.prepend(card);
+
+  // Read file content
+  const text = await readFile(file);
+
+  // Auto-detect file type and route accordingly
+  const type = detectFileType(file.name, text);
+
+  // Store in central data store
+  dataStore.files.push({ name: file.name, type, text, size: file.size });
+
+  // Parse data based on type
+  if (type === 'finance') { parseFinance(text); dataStore.finance = text; }
+  else if (type === 'leads') { parseLeads(text); dataStore.leads = text; }
+  else if (type === 'performance') { dataStore.performance = text; updatePerfPage(text); }
+  else { dataStore.general.push({ name: file.name, text }); }
+
+  // AI analysis
+  card.querySelector('div:last-child').remove();
+  card.querySelector('div:nth-child(2) div:last-child').textContent = (file.size/1024).toFixed(0) + ' KB · Analysing with AI…';
+
+  const ctx = document.getElementById('biz-ctx').value;
+  const prompt = `Analyse this business data file: ${file.name}
+
+File type detected: ${type}
+Contents:
+${text.substring(0, 3000)}
+
+Business: ${userCo} — ${userInd}
+${ctx ? 'Context: ' + ctx : ''}
+
+Provide:
+1. What this file contains (1 sentence)
+2. Top 3 insights with specific numbers
+3. Top 3 actions to take based on this data
+4. Anything urgent that needs immediate attention
+
+Be specific. Reference real numbers from the data. Under 200 words.`;
+
+  const result = await quickAI(prompt, 500);
+
+  // Update file card to done state
+  card.style.borderColor = 'var(--green)';
+  card.innerHTML = `
+    <div style="font-size:24px">${getFileIcon(file.name)}</div>
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:600">${file.name}</div>
+      <div style="font-size:11px;color:var(--green);margin-top:2px">✓ Analysed · ${type.charAt(0).toUpperCase()+type.slice(1)} data · Synced to dashboard</div>
+      ${result ? `<div style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.6;white-space:pre-line">${result}</div>` : ''}
+    </div>
+    <span class="tag t-g">✓ Synced</span>
+  `;
+
+  // Update the AI Advisor context with this data
+  updateAdvisorContext(file.name, type, text);
+
+  // Update summary bar
+  updateDataSummary();
+
+  // Sync to relevant pages
+  syncToPages(type, text, result);
+
+  showToast('✓ ' + file.name + ' analysed and synced to your dashboard');
+}
+
+function getFileIcon(name) {
+  const ext = name.split('.').pop().toLowerCase();
+  if (['csv','xlsx','xls'].includes(ext)) return '📊';
+  if (['pdf'].includes(ext)) return '📄';
+  if (['doc','docx'].includes(ext)) return '📝';
+  return '📁';
+}
+
+function detectFileType(name, text) {
+  const n = name.toLowerCase();
+  const t = text.toLowerCase();
+  if (n.includes('sales') || n.includes('revenue') || n.includes('invoice') || n.includes('expense') || t.includes('invoice') || t.includes('revenue')) return 'finance';
+  if (n.includes('lead') || n.includes('crm') || n.includes('pipeline') || t.includes('lead') || t.includes('pipeline')) return 'leads';
+  if (n.includes('instagram') || n.includes('analytics') || n.includes('social') || n.includes('performance') || t.includes('engagement') || t.includes('reach')) return 'performance';
+  if (n.includes('feedback') || n.includes('review') || n.includes('survey') || t.includes('rating') || t.includes('satisfaction')) return 'feedback';
+  return 'general';
+}
+
+function updateAdvisorContext(filename, type, text) {
+  const ctx = document.getElementById('biz-ctx');
+  if (!ctx) return;
+  const snippet = '\n\n--- Data from ' + filename + ' ---\n' + text.substring(0, 800);
+  if (!ctx.value.includes(filename)) {
+    ctx.value = ctx.value + snippet;
+  }
+}
+
+function updateDataSummary() {
+  const bar = document.getElementById('data-summary-bar');
+  const txt = document.getElementById('data-summary-text');
+  if (!bar || !txt) return;
+  const count = dataStore.files.length;
+  const types = [...new Set(dataStore.files.map(f => f.type))];
+  txt.textContent = count + ' file' + (count !== 1 ? 's' : '') + ' uploaded · ' + types.join(', ') + ' data synced to all pages';
+  bar.style.display = 'block';
+}
+
+function syncToPages(type, text, analysis) {
+  // Finance page
+  if (type === 'finance') {
+    const el = document.getElementById('fin-ai');
+    if (el && analysis) el.innerHTML = '<div style="white-space:pre-line;font-size:13px;line-height:1.8">' + analysis + '</div>';
+  }
+  // Leads page
+  if (type === 'leads') {
+    const el = document.getElementById('leads-ai');
+    if (el && analysis) el.innerHTML = '<div style="white-space:pre-line;font-size:13px;line-height:1.8">' + analysis + '</div>';
+  }
+  // Performance page
+  if (type === 'performance') {
+    updatePerfPage(text, analysis);
+  }
+  // Update dashboard insights
+  if (analysis) updateDashboardInsights(type, analysis);
+}
+
+function updatePerfPage(text, analysis) {
+  const out = document.getElementById('perf-out');
+  if (!out) return;
+  if (analysis) {
+    out.innerHTML = '<div class="card" style="white-space:pre-line;font-size:13px;line-height:1.8"><strong>📊 AI Performance Analysis</strong>\n\n' + analysis + '</div>';
+  }
+}
+
+function updateDashboardInsights(type, analysis) {
+  const list = document.getElementById('insights-list');
+  if (!list) return;
+  const icons = { finance: '💰', leads: '🎯', performance: '📊', feedback: '💬', general: '📄' };
+  const ico = icons[type] || '📊';
+  const existing = list.querySelector('.insight');
+  const newInsight = document.createElement('div');
+  newInsight.className = 'insight';
+  newInsight.innerHTML = `
+    <div class="ins-ico" style="background:var(--accent-bg)">${ico}</div>
+    <div>
+      <div class="ins-title">${type.charAt(0).toUpperCase()+type.slice(1)} data uploaded</div>
+      <div class="ins-sub">${analysis ? analysis.split('\n')[0] : 'Data synced to your dashboard.'}</div>
+    </div>
+  `;
+  if (existing) { list.insertBefore(newInsight, existing); } else { list.appendChild(newInsight); }
+}
+
+// ── GOOGLE CONNECTION ──
+function connectGoogle() {
+  showToast('Opening Google authentication…');
+  // Show instructions since OAuth needs backend
+  setTimeout(() => {
+    const status = document.getElementById('gsuite-status');
+    if (status) { status.textContent = 'OAuth launching soon'; status.className = 'tag t-a'; }
+    showToast('Google OAuth launches with Pro plan. Use Google Sheets URL below for instant connection — no login needed!');
+  }, 1500);
+}
+
+async function connectSheet() {
+  const url = document.getElementById('sheets-url').value.trim();
+  const statusEl = document.getElementById('sheets-status');
+  if (!url) { showToast('Please paste your Google Sheets URL'); return; }
+  if (!url.includes('docs.google.com/spreadsheets')) { showToast('Please paste a valid Google Sheets URL'); return; }
+
+  statusEl.innerHTML = '<div class="notice info">Connecting to your Google Sheet…</div>';
+
+  // Convert to CSV export URL
+  const sheetId = url.match(/\/d\/([a-zA-Z0-9-_]+)/)?.[1];
+  if (!sheetId) { statusEl.innerHTML = '<div class="notice warn">Could not read Sheet ID from URL. Make sure it is a valid Google Sheets link.</div>'; return; }
+
+  const csvUrl = 'https://docs.google.com/spreadsheets/d/' + sheetId + '/export?format=csv';
+
+  try {
+    const r = await fetch(csvUrl);
+    if (!r.ok) throw new Error('Could not access sheet. Make sure it is set to Anyone with the link can view.');
+    const text = await r.text();
+    dataStore.sheets = text;
+    dataStore.connections.sheet_url = url;
+
+    // Analyse the sheet
+    const result = await quickAI('Analyse this Google Sheets data for ' + userCo + ':\n\n' + text.substring(0, 3000) + '\n\nProvide: what this sheet tracks, top 3 insights, top 3 recommendations. Under 200 words.', 500);
+
+    statusEl.innerHTML = '<div class="notice good">✓ Google Sheet connected and synced! ' + (result ? result.split('\n')[0] : '') + '</div>';
+    document.getElementById('gsuite-status').textContent = '✓ Sheet connected';
+    document.getElementById('gsuite-status').className = 'tag t-g';
+    dataStore.connections.google = true;
+
+    // Add to advisor context
+    const ctx = document.getElementById('biz-ctx');
+    if (ctx && !ctx.value.includes('Google Sheet')) {
+      ctx.value += '\n\n--- Google Sheet Data ---\n' + text.substring(0, 600);
+    }
+
+    if (result) updateDashboardInsights('general', result);
+    showToast('✓ Google Sheet synced to your dashboard!');
+
+  } catch(e) {
+    statusEl.innerHTML = '<div class="notice warn">Could not connect to this sheet. Make sure sharing is set to "Anyone with the link can view" in Google Sheets → Share.</div>';
+  }
+}
+
+// ── MICROSOFT CONNECTION ──
+function connectMicrosoft() {
+  showToast('Opening Microsoft authentication…');
+  setTimeout(() => {
+    const status = document.getElementById('ms-status');
+    if (status) { status.textContent = 'OAuth launching soon'; status.className = 'tag t-a'; }
+    showToast('Microsoft OAuth launches with Pro plan. Upload Excel files from OneDrive manually for now using the Data Hub.');
+  }, 1500);
+}
+
+// Keep old handlers working for Finance and Leads pages
+function dropFile(e, section) {
+  e.preventDefault();
+  const d = document.getElementById(section + '-drop');
+  if (d) d.classList.remove('drag');
+  Array.from(e.dataTransfer.files).forEach(f => handleFile(f));
+}
+function fileInput(e, section) {
+  Array.from(e.target.files).forEach(f => handleFile(f));
+}
+
 </script>
 </body>
 </html>
