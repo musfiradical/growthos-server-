@@ -5,7 +5,6 @@ const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const API_KEY = process.env.ANTHROPIC_API_KEY;
 
 // ── MIDDLEWARE ──
 app.use(cors());
@@ -14,15 +13,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // ── HEALTH CHECK ──
 app.get('/health', (req, res) => {
+  const key = process.env.ANTHROPIC_API_KEY;
   res.json({
     status: 'ok',
-    hasKey: !!API_KEY,
+    hasKey: !!(key && key.length > 10),
     timestamp: new Date().toISOString()
   });
 });
 
 // ── MAIN AI ENDPOINT ──
 app.post('/api/chat', async (req, res) => {
+  const API_KEY = process.env.ANTHROPIC_API_KEY;
+
   try {
     const { messages, system, max_tokens } = req.body;
 
@@ -31,7 +33,7 @@ app.post('/api/chat', async (req, res) => {
     }
 
     if (!API_KEY) {
-      return res.status(500).json({ error: 'API key not configured on server. Add ANTHROPIC_API_KEY to Railway environment variables.' });
+      return res.status(500).json({ error: 'API key not configured. Add ANTHROPIC_API_KEY to Railway environment variables.' });
     }
 
     const body = {
@@ -54,8 +56,8 @@ app.post('/api/chat', async (req, res) => {
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
       console.error('Anthropic error:', err);
-      if (response.status === 401) return res.status(401).json({ error: 'Invalid API key. Check your Railway environment variables.' });
-      if (response.status === 429) return res.status(429).json({ error: 'Rate limit hit. Wait a moment and try again.' });
+      if (response.status === 401) return res.status(401).json({ error: 'Invalid API key.' });
+      if (response.status === 429) return res.status(429).json({ error: 'Rate limit hit. Try again in a moment.' });
       return res.status(response.status).json({ error: err.error?.message || 'Anthropic API error' });
     }
 
@@ -76,9 +78,9 @@ app.get('*', (req, res) => {
 
 // ── START ──
 app.listen(PORT, () => {
+  const key = process.env.ANTHROPIC_API_KEY;
   console.log('');
   console.log('  ✅ GrowthOS Server running on port ' + PORT);
-  console.log('  ✅ API key: ' + (API_KEY ? 'configured ✓' : '❌ MISSING — add to Railway env vars'));
-  console.log('  ✅ Frontend: http://localhost:' + PORT);
+  console.log('  ✅ API key: ' + (key ? 'configured ✓' : '❌ MISSING'));
   console.log('');
 });
